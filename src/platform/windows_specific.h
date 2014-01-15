@@ -149,11 +149,30 @@ namespace octet {
       RegisterClass (&wndclass);
 
       gl_context = 0;
-     
-      window_handle = CreateWindow(L"MyClass", L"octet",
-        WS_OVERLAPPEDWINDOW, CW_USEDEFAULT, CW_USEDEFAULT, 512, 512,
-        NULL, NULL, wndclass.hInstance, (LPVOID)this
-      );
+
+			RECT desktop;
+			const HWND hDesktop = GetDesktopWindow();
+			GetWindowRect(hDesktop, &desktop);
+
+			RECT console;
+			HWND hConsole = GetConsoleWindow();
+			GetWindowRect(hConsole, &console);
+			MoveWindow(hConsole, 10, (desktop.bottom*0.5) - (console.bottom*0.5), console.right*0.7, console.bottom*0.7, TRUE);
+
+			if(desktop.right == 1920 && desktop.bottom == 1080)
+      {
+				window_handle = CreateWindow(L"MyClass", L"Thronecraft",
+				  WS_OVERLAPPEDWINDOW, console.right*0.7 + 20, 10, 900, 900,
+				  NULL, NULL, wndclass.hInstance, (LPVOID)this
+				);
+			}
+			else
+			{
+				window_handle = CreateWindow(L"MyClass", L"Thronecraft",
+				  WS_OVERLAPPEDWINDOW, CW_USEDEFAULT, CW_USEDEFAULT, CW_USEDEFAULT, CW_USEDEFAULT,
+				  NULL, NULL, wndclass.hInstance, (LPVOID)this
+				);
+			}
 
       map()[window_handle] = this;
 
@@ -180,7 +199,7 @@ namespace octet {
       GetClientRect(window_handle, &rect);
       set_viewport_size(rect.right - rect.left, rect.bottom - rect.top);
 
-      RECT pos;
+			RECT pos;
 			GetWindowRect(window_handle, &pos);
 
       draw_world(rect.left, rect.top, rect.right - rect.left, rect.bottom - rect.top, pos.left, pos.top);
@@ -273,6 +292,8 @@ namespace octet {
               app->set_key(app::translate(msg.wParam), msg.message == WM_SYSKEYDOWN);
             } else if (msg.message == WM_MOUSEMOVE) {
               app->set_mouse_pos(msg.lParam & 0xffff, msg.lParam >> 16);
+							app->motion(msg.lParam & 0xffff, msg.lParam >> 16, &app->window_handle);
+							ShowCursor(false);
             } else if (msg.message == WM_MOUSEWHEEL) {
               app->set_mouse_wheel(app->get_mouse_wheel() + (int)msg.wParam);
             } else if (msg.message == WM_LBUTTONDOWN || msg.message == WM_LBUTTONUP) {
@@ -280,7 +301,7 @@ namespace octet {
             } else if (msg.message == WM_MBUTTONDOWN || msg.message == WM_MBUTTONUP) {
               app->set_key(key_mmb, msg.message == WM_MBUTTONDOWN);
             } else if (msg.message == WM_RBUTTONDOWN || msg.message == WM_RBUTTONUP) {
-              app->set_key(key_mmb, msg.message == WM_RBUTTONDOWN);
+              app->set_key(key_rmb, msg.message == WM_RBUTTONDOWN);
             } else if (msg.message == WM_DROPFILES) {
               handle_file_drop(app, (HDROP)msg.wParam);
             }
@@ -289,7 +310,7 @@ namespace octet {
         }
 
         // waste some time. (do not do this in real games!)
-        Sleep(1000/30);
+        //Sleep(1000/30);
 
         for (int i = 0; i != m.size(); ++i) {
           // note: because Win8 generates an invisible window, we need to check m.value(i)

@@ -71,7 +71,7 @@ namespace octet {
 
       // set up opengl to draw flat shaded triangles of a fixed color
       vec4 color(0, 0, 1, 1);
-      color_shader_.render(modelToProjection, color);
+//      color_shader_.render(modelToProjection, color);
 
       // this is an array of the positions of the corners of the triangle in 3D
       // static const means that it is created at compile time
@@ -88,7 +88,7 @@ namespace octet {
       glEnableVertexAttribArray(attribute_pos);
     
       // finally, draw the triangle (3 vertices)
-      glDrawArrays(GL_TRIANGLES, 0, 3);
+      glDrawArrays(GL_LINES, 0, 3);
     }
   };
 }

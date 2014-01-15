@@ -46,7 +46,7 @@ namespace octet {
       mat4t modelToProjection = mat4t::build_projection_matrix(modelToWorld, cameraToWorld);
 
       // set up the uniforms for the shader
-      shader.render(modelToProjection, color);
+//      shader.render(modelToProjection, color);
 
       // this is an array of the positions of the corners of the box in 3D
       // a straight "float" here means this array is being generated here at runtime.

@@ -36,6 +36,7 @@
     <ClInclude Include="..\..\src\containers\ref.h" />
     <ClInclude Include="..\..\src\containers\string.h" />
     <ClInclude Include="..\..\src\examples\layer2\engine.h" />
+    <ClInclude Include="..\..\src\examples\layer2\thronecraft\ThroneCraft.h" />
     <ClInclude Include="..\..\src\helpers\http_server.h" />
     <ClInclude Include="..\..\src\helpers\mouse_ball.h" />
     <ClInclude Include="..\..\src\helpers\object_picker.h" />
@@ -50,6 +51,7 @@
     <ClInclude Include="..\..\src\math\bvec2.h" />
     <ClInclude Include="..\..\src\math\bvec3.h" />
     <ClInclude Include="..\..\src\math\bvec4.h" />
+    <ClInclude Include="..\..\src\math\chunk.h" />
     <ClInclude Include="..\..\src\math\ivec4.h" />
     <ClInclude Include="..\..\src\math\mat4t.h" />
     <ClInclude Include="..\..\src\math\quat.h" />
@@ -57,6 +59,7 @@
     <ClInclude Include="..\..\src\math\rational.h" />
     <ClInclude Include="..\..\src\math\ray.h" />
     <ClInclude Include="..\..\src\math\scalar.h" />
+    <ClInclude Include="..\..\src\math\super_chunk.h" />
     <ClInclude Include="..\..\src\math\vec2.h" />
     <ClInclude Include="..\..\src\math\vec3.h" />
     <ClInclude Include="..\..\src\math\vec4.h" />
@@ -162,6 +165,11 @@
       <SubSystem>Console</SubSystem>
       <GenerateDebugInformation>true</GenerateDebugInformation>
       <AdditionalLibraryDirectories>..\..\lib</AdditionalLibraryDirectories>
+      <StackCommitSize>
+      </StackCommitSize>
+      <LargeAddressAware>
+      </LargeAddressAware>
+      <StackReserveSize>2048000</StackReserveSize>
     </Link>
   </ItemDefinitionGroup>
   <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">

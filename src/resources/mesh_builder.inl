@@ -21,5 +21,6 @@ namespace octet {
     s.add_attribute(attribute_pos, 3, GL_FLOAT, 0);
     s.add_attribute(attribute_normal, 3, GL_FLOAT, 12);
     s.add_attribute(attribute_uv, 2, GL_FLOAT, 24);
+    s.add_attribute(attribute_color, 4, GL_FLOAT, 32);
   }
 }

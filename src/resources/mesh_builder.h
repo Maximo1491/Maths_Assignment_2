@@ -11,7 +11,7 @@
 
 namespace octet {
   class mesh_builder {
-    struct vertex { float pos[3]; float normal[3]; float uv[2]; };
+    struct vertex { float pos[3]; float normal[3]; float uv[2]; float color[4];};
     dynarray<vertex, allocator> vertices;
     dynarray<unsigned short, allocator> indices;
 
@@ -32,10 +32,11 @@ namespace octet {
     // For a cube, add the front face. Matrix transforms are used to add the others.
     void add_front_face(float size) {
       unsigned short cur_vertex = (unsigned short)vertices.size();
-      add_vertex(vec4(-size, -size, size, 1), vec4(0, 0, 1, 0), 0, 0);
-      add_vertex(vec4(-size,  size, size, 1), vec4(0, 0, 1, 0), 0, 1);
-      add_vertex(vec4( size,  size, size, 1), vec4(0, 0, 1, 0), 1, 1);
-      add_vertex(vec4( size, -size, size, 1), vec4(0, 0, 1, 0), 1, 0);
+        add_vertex(vec4(-size, -size, size, 1), vec4(0, 0, 1, 0), 0, 0, vec4(0.65f, 0.165f, 0.165f, 1));
+        add_vertex(vec4(-size,  size, size, 1), vec4(0, 0, 1, 0), 0, 1, vec4(0.65f, 0.165f, 0.165f, 1));
+        add_vertex(vec4( size,  size, size, 1), vec4(0, 0, 1, 0), 1, 1, vec4(0.65f, 0.165f, 0.165f, 1));
+        add_vertex(vec4( size, -size, size, 1), vec4(0, 0, 1, 0), 1, 0, vec4(0.65f, 0.165f, 0.165f, 1));
+      
       indices.push_back(cur_vertex+0);
       indices.push_back(cur_vertex+1);
       indices.push_back(cur_vertex+2);
@@ -53,7 +54,7 @@ namespace octet {
       unsigned first_index = (unsigned)vertices.size();
       float u = 0;
       for (unsigned i = 0; i <= num_vertices; ++i) {
-        add_vertex(vec4(radius, 0, 0, 1), normal, u, v);
+        add_vertex(vec4(radius, 0, 0, 1), normal, u, v, vec4(0,0,1,1));
         matrix.rotateSpecial(delta_c, delta_s, 0, 1);
         u += rnv * uvscale;
       }
@@ -74,7 +75,7 @@ namespace octet {
 
       if (!is_sphere) {
         // end cap for cone
-        unsigned center = add_vertex(vec4(0, 0, 0, 1), vec4(0, 0, -1, 0), 0, 1);
+        unsigned center = add_vertex(vec4(0, 0, 0, 1), vec4(0, 0, -1, 0), 0, 1, vec4(0,0,1,1));
         unsigned cur_ring = add_ring(radius, vec4(0, 0, -1, 0), slices, 0, uvscale);
         for (unsigned j = 0; j != slices; ++j) {
           indices.push_back(center);
@@ -123,10 +124,10 @@ namespace octet {
     }
 
     // add one vertex to the model
-    unsigned add_vertex(const vec4 &pos, const vec4 &normal, float u, float v) {
+    unsigned add_vertex(const vec4 &pos, const vec4 &normal, float u, float v, const vec4 &color) {
       vec4 tpos = pos * matrix;
       vec4 tnormal = normal * matrix;
-      vertex vtx = { tpos[0], tpos[1], tpos[2], tnormal[0], tnormal[1], tnormal[2], u, v };
+      vertex vtx = { tpos[0], tpos[1], tpos[2], tnormal[0], tnormal[1], tnormal[2], u, v, color[0], color[1], color[2], color[3] };
       unsigned result = (unsigned)vertices.size();
       vertices.push_back(vtx);
       return result;
@@ -156,6 +157,113 @@ namespace octet {
       matrix.rotateX90();
     }
 
+    /*void add_chunk(voxel*** vector_, int size)
+    {
+      for(int x = 0; x < size; x++)
+			{
+				for(int y = 0; y < size; y++)
+				{
+					for(int z = 0; z < size; z++)
+					{
+						matrix.translate(0,0,-2);
+
+						if(((x == 0 || x == size - 1) ||
+							 ( y == 0 || y == size - 1) ||
+							 ( z == 0 || z == size - 1))&&
+               vector_[x][y][z].isActive())
+						{
+							add_cube(1.0f, vector_[x][y][z].getType());
+							continue;
+						}
+
+            if(x == 0)
+            {
+              if( vector_[x+1][y][z].isActive() && 
+								  vector_[x][y+1][z].isActive() && vector_[x][y-1][z].isActive() &&
+								  vector_[x][y][z+1].isActive() && vector_[x][y][z-1].isActive() )
+              {
+                if(vector_[x][y][z].isActive())
+                  add_cube(1.0f, vector_[x][y][z].getType());
+                continue;
+              }
+            }
+
+            if(x == size - 1)
+            {
+              if( vector_[x-1][y][z].isActive() && 
+								  vector_[x][y+1][z].isActive() && vector_[x][y-1][z].isActive() &&
+								  vector_[x][y][z+1].isActive() && vector_[x][y][z-1].isActive() )
+              {
+                if(vector_[x][y][z].isActive())
+                  add_cube(1.0f, vector_[x][y][z].getType());
+                continue;
+              }
+            }
+						
+            if(y == 0)
+            {
+              if( vector_[x+1][y][z].isActive() && vector_[x-1][y][z].isActive() &&
+								  vector_[x][y+1][z].isActive() && 
+								  vector_[x][y][z+1].isActive() && vector_[x][y][z-1].isActive() )
+              {
+                if(vector_[x][y][z].isActive())
+                  add_cube(1.0f, vector_[x][y][z].getType());
+                continue;
+              }
+            }
+
+            if(y == size - 1)
+            {
+              if( vector_[x+1][y][z].isActive() && vector_[x-1][y][z].isActive() &&
+								  vector_[x][y-1][z].isActive() && 
+								  vector_[x][y][z+1].isActive() && vector_[x][y][z-1].isActive() )
+              {
+                if(vector_[x][y][z].isActive())
+                  add_cube(1.0f, vector_[x][y][z].getType());
+                continue;
+              }
+            }
+
+            if(z == 0)
+            {
+              if( vector_[x+1][y][z].isActive() && vector_[x-1][y][z].isActive() &&
+								  vector_[x][y+1][z].isActive() && vector_[x][y-1][z].isActive() &&
+								  vector_[x][y][z+1].isActive() )
+              {
+                if(vector_[x][y][z].isActive())
+                  add_cube(1.0f, vector_[x][y][z].getType());
+                continue;
+              }
+            }
+
+            if(z == size - 1)
+            {
+              if( vector_[x-1][y][z].isActive() && vector_[x-1][y][z].isActive() &&
+								  vector_[x][y+1][z].isActive() && vector_[x][y-1][z].isActive() &&
+								  vector_[x][y][z-1].isActive() )
+              {
+                if(vector_[x][y][z].isActive())
+                  add_cube(1.0f, vector_[x][y][z].getType());
+                continue;
+              }
+            }
+
+						if( vector_[x+1][y][z].isActive() && vector_[x-1][y][z].isActive() &&
+								vector_[x][y+1][z].isActive() && vector_[x][y-1][z].isActive() &&
+								vector_[x][y][z+1].isActive() && vector_[x][y][z-1].isActive()
+							)
+							continue;
+            if(vector_[x][y][z].isActive())
+            {
+						  add_cube(1.0f, vector_[x][y][z].getType());
+            }
+					}
+					matrix.translate(0,-2,size*2);
+				}
+				matrix.translate(-2,size*2,0);
+			}
+    }*/
+
     // add a subdivided size*size plane with nx*ny squares
     void add_plane(float size, unsigned nx, unsigned ny) {
       float xsize = size / nx;
@@ -164,10 +272,10 @@ namespace octet {
       for (unsigned i = 0; i != nx; ++i) {
         for (unsigned j = 0; j != ny; ++j) {
           unsigned short cur_vertex = (unsigned short)vertices.size();
-          add_vertex(vec4( i*xsize+sizeBy2, j*ysize+sizeBy2, 0, 1), vec4(0, 0, 1, 0), 0, 0);
-          add_vertex(vec4( i*xsize+sizeBy2, (j+1)*ysize+sizeBy2, 0, 1), vec4(0, 0, 1, 0), 0, 1);
-          add_vertex(vec4( (i+1)*xsize+sizeBy2, (j+1)*ysize+sizeBy2, 0, 1), vec4(0, 0, 1, 0), 1, 1);
-          add_vertex(vec4( (i+1)*xsize+sizeBy2, j*ysize+sizeBy2, 0, 1), vec4(0, 0, 1, 0), 1, 0);
+          add_vertex(vec4( i*xsize+sizeBy2, j*ysize+sizeBy2, 0, 1), vec4(0, 0, 1, 0), 0, 0, vec4(0,0,1,1));
+          add_vertex(vec4( i*xsize+sizeBy2, (j+1)*ysize+sizeBy2, 0, 1), vec4(0, 0, 1, 0), 0, 1, vec4(0,0,1,1));
+          add_vertex(vec4( (i+1)*xsize+sizeBy2, (j+1)*ysize+sizeBy2, 0, 1), vec4(0, 0, 1, 0), 1, 1, vec4(0,0,1,1));
+          add_vertex(vec4( (i+1)*xsize+sizeBy2, j*ysize+sizeBy2, 0, 1), vec4(0, 0, 1, 0), 1, 0, vec4(0,0,1,1));
           indices.push_back(cur_vertex+0);
           indices.push_back(cur_vertex+1);
           indices.push_back(cur_vertex+2);
