@@ -76,7 +76,7 @@ namespace octet
 			ui_shader_.init();
 
 			//player position & gravity
-			position = glm::vec3(176, 60, 176);
+			position = glm::vec3(0, 0, -40);
 			gravity = false;
 
 			//Get window width and height for UI elements
@@ -123,92 +123,32 @@ namespace octet
 
       light_angle = 0.0f;
 
-			//Light 2
-			//light_information[1] = glm::vec4( -2.0f, -1.0f, -4.0f, 0.0f );
-
 			projection = glm::perspective(45.0f, 1.0f*windowWidth/windowHeight, 0.1f, 256.0f);
 			
 			c = new superChunk();
 
-			int i = 1;
-			bool downhill = false;
-
 			//Start by selecting a grass block
 			selectedBlock = grass;
 
-			FILE* file = fopen("../../assets/thronecraft/saveFile.txt", "r");
+			chunksX = SCX;
+			chunksY = SCY;
+			chunksZ = SCZ;
 
-			//Tell the progam how many chunks we want.
-			if (file == NULL)
+			//Loops through 1 chunk and creates either a type 1 or type 2,
+			//uncomment the SCX stuff to fill the whole superChunk
+			for(int x = 0; x < CX * chunksX/* *SCX */; x++)
 			{
-				chunksX = SCX;
-				chunksY = SCY;
-				chunksZ = SCZ;
-
-				//Loops through 1 chunk and creates either a type 1 or type 2,
-				//uncomment the SCX stuff to fill the whole superChunk
-				for(int x = 0; x < CX * chunksX/* *SCX */; x++)
+				for(int y = 0; y < CY * chunksY/2/* *SCY */; y++)
 				{
-					for(int y = 0; y < CY * chunksY/2/* *SCY */; y++)
-					{
-						 //if(y < i)
+					 //if(y < i)
+					 {
+						 for(int z = 0; z < CZ * chunksZ/* *SCZ */; z++)
 						 {
-							 for(int z = 0; z < CZ * chunksZ/* *SCZ */; z++)
-							 {
-								 if(y == 31)
-									 c->set(x,y,z, 1);
-								 if(y <= 30 && y > 27)
-									 c->set(x,y,z, 2);
-								 if(y <= 27)
-									 c->set(x,y,z, 3);
-							 }
-						}
+								 c->set(x,y,z, 1);
+						 }
 					}
 				}
 			}
-
-			else
-			{
-				fscanf(file, "%i", &chunksX);
-				fscanf(file, "%i", &chunksY);
-				fscanf(file, "%i", &chunksZ);
-
-				int intScan;
-
-				for (int x = 0; x < CX * chunksX; x++)
-				{
-					for (int y = 0; y < CY * chunksY; y++)
-					{
-						for (int z = 0; z < CZ * chunksZ; z++)
-						{
-							fscanf(file, "%i", &intScan);
-							c->set(x, y, z, intScan);
-						}
-					}
-				}
-			}
-		}
-
-		void SaveChunks()
-		{
-			FILE* file = fopen("../../assets/thronecraft/saveFile.txt", "w");
-
-			fprintf(file, "%i %i %i\n", chunksX, chunksY, chunksZ);
-
-			for (int x = 0; x < CX * chunksX; x++)
-			{
-				for (int y = 0; y < CY * chunksY; y++)
-				{
-					for (int z = 0; z < CZ * chunksZ; z++)
-					{
-						fprintf(file, "%i ", c->get(x, y, z));
-					}
-
-					fprintf(file, "\n");
-				}
-			}
-
-			fclose(file);
 		}
 
 		//mouse movement
@@ -415,40 +355,19 @@ namespace octet
 
 			glm::vec3 forward_dir = glm::vec3(sinf(angles.x), 0, cosf(angles.x));
 			glm::vec3 right_dir = glm::vec3(-forward_dir.z, 0, forward_dir.x);
-			glm::vec3 temp_w;
-			glm::vec3 temp_a;
-			glm::vec3 temp_s;
-			glm::vec3 temp_d;
 
 			if(is_key_down('A'))
-				temp_a = position - (right_dir * (movespeed * 3));
-				if(c->get(glm::floor(temp_a.x), glm::floor(temp_a.y), glm::floor(temp_a.z)) == 0){
 					position -= right_dir * movespeed;
-				}
 			if(is_key_down('D'))
-				temp_d = position + (right_dir * (movespeed * 3));
-				if(c->get(glm::floor(temp_d.x), glm::floor(temp_d.y), glm::floor(temp_d.z)) == 0){
 					position += right_dir * movespeed;
-				}
 			if(is_key_down('W'))
-				temp_w = position + (forward_dir * (movespeed * 3));
-				if(c->get(glm::floor(temp_w.x), glm::floor(temp_w.y), glm::floor(temp_w.z)) == 0){
 					position += forward_dir * movespeed;
-				}
 			if(is_key_down('S'))
-				temp_s = position - (forward_dir * (movespeed * 3));
-				if(c->get(glm::floor(temp_s.x), glm::floor(temp_s.y), glm::floor(temp_s.z)) == 0){
 					position -= forward_dir * movespeed;
-				}
 			if(is_key_down('Q'))
 				position.y += movespeed;
 			if(is_key_down('E'))
 				position.y -= movespeed;
-			if (is_key_down('P'))
-			{
-				set_key('P', false);
-				SaveChunks();
-			}
 			if(is_key_down('O'))
 			{
 				set_key('O', false);
@@ -528,9 +447,6 @@ namespace octet
 
 		void update_player()
 		{
-			if (c->get(glm::floor(position.x), glm::floor(position.y - 1), glm::floor(position.z)) == 0 && gravity == true){
-				position.y -= 0.6f;
-			}
 		}
 
 		void draw_world(int x, int y, int width, int height, int windowX, int windowY)
@@ -547,12 +463,10 @@ namespace octet
 
 			if (is_key_down(27))
 			{
-				SaveChunks();
 				exit(1);
 			}
 
       light_information[0] = glm::vec4(sin(light_angle * 0.0174532925f), cos(light_angle * 0.0174532925f), 0.0f, 0.0f);
-      light_angle += 1.0f;
 
 			//Draws our super chunk
 			c->render(model, view, projection, numOfLights, light_information, light_diffuse, light_ambient, color_shader_);
