@@ -42,7 +42,13 @@ namespace octet {
   }
 
   inline void run_examples(int argc, char **argv) {
+#ifdef __APPLE__
+#ifdef TARGET_OS_MAC
+    app_utils::prefix("../");
+#endif
+#elif defined(_WIN32) || defined(_WIN64)
     app_utils::prefix("../../");
+#endif
     app::init_all(argc, argv);
 
     if (argc == 1) {
