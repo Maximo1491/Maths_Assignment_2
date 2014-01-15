@@ -35,8 +35,6 @@
 #include <stdarg.h>
 #include <math.h>
 #include <assert.h>
-#include <time.h>
-#include <iostream>
 
 // xml library
 #include "../tinyxml/tinystr.cpp"
@@ -143,11 +141,9 @@ static char *get_sprintf_buffer() {
 #include "../shaders/texture_shader.h"
 #include "../shaders/phong_shader.h"
 #include "../shaders/bump_shader.h"
-#include "../shaders/my_shader.h"
 #include "../shaders/ui_shader.h"
 #include "../physics/physics.h"
 
-//Thronecraft
 #define CX 16
 #define CY 16
 #define CZ 16

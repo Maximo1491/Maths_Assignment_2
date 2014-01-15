@@ -340,15 +340,6 @@
     <ClInclude Include="..\..\src\scene\mesh_text.h">
       <Filter>octet\scene</Filter>
     </ClInclude>
-    <ClInclude Include="..\..\src\math\chunk.h">
-      <Filter>octet\math</Filter>
-    </ClInclude>
-    <ClInclude Include="..\..\src\math\super_chunk.h">
-      <Filter>octet\math</Filter>
-    </ClInclude>
-    <ClInclude Include="..\..\src\examples\layer2\thronecraft\ThroneCraft.h">
-      <Filter>Source Files</Filter>
-    </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <None Include="..\..\src\resources\mesh_builder.inl">

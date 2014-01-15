@@ -44,8 +44,6 @@ namespace octet {
 
       // standardize the attribute slots (in NVidia's CG you can do this in the shader)
       glBindAttribLocation(program, attribute_pos, "pos");
-			glBindAttribLocation(program, attribute_position, "position");
-			glBindAttribLocation(program, attribute_texcoord, "texcoord");
       glBindAttribLocation(program, attribute_normal, "normal");
       glBindAttribLocation(program, attribute_tangent, "tangent");
       glBindAttribLocation(program, attribute_bitangent, "bitangent");
@@ -53,8 +51,6 @@ namespace octet {
       glBindAttribLocation(program, attribute_blendindices, "blendindices");
       glBindAttribLocation(program, attribute_color, "color");
       glBindAttribLocation(program, attribute_uv, "uv");
-			glBindAttribLocation(program, attribute_player, "player");
-			glBindAttribLocation(program, attribute_type, "type");
       glLinkProgram(program);
 
       program_ = program;

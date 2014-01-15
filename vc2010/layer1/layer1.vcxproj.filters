@@ -190,21 +190,6 @@
     <ClInclude Include="..\..\src\examples\layer1\triangle\triangle_app.h">
       <Filter>Source Files</Filter>
     </ClInclude>
-    <ClInclude Include="..\..\src\examples\layer1\angry_box2d\angry_box2d_app.h">
-      <Filter>Source Files</Filter>
-    </ClInclude>
-    <ClInclude Include="..\..\src\examples\layer1\falldown\falldown_app.h">
-      <Filter>Source Files</Filter>
-    </ClInclude>
-    <ClInclude Include="..\..\src\shaders\my_shader.h">
-      <Filter>octet\shaders</Filter>
-    </ClInclude>
-    <ClInclude Include="..\..\src\math\chunk.h">
-      <Filter>octet\math</Filter>
-    </ClInclude>
-    <ClInclude Include="..\..\src\math\super_chunk.h">
-      <Filter>octet\math</Filter>
-    </ClInclude>
     <ClInclude Include="..\..\src\examples\layer1\thronecraft\ThroneCraft.h">
       <Filter>Source Files</Filter>
     </ClInclude>

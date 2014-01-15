@@ -53,7 +53,7 @@ namespace octet {
       cameraToWorld.loadIdentity();
       cameraToWorld.translate(0, 0, 5);
 
-      //cube_mesh.make_cube();
+      cube_mesh.make_cube();
       //cube_mesh.make_cone();
       //cube_mesh.make_sphere();
 

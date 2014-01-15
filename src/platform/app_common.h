@@ -10,9 +10,7 @@ namespace octet {
   // standard attribute names
   enum attribute {
     attribute_position = 0,
-    attribute_pos = 1,
-		attribute_player = 2,
-		attribute_type = 2,
+    attribute_pos = 0,
     attribute_blendweight = 1,
     attribute_normal = 2,
     attribute_diffuse = 3,
@@ -96,7 +94,6 @@ namespace octet {
 
     virtual void draw_world(int x, int y, int w, int h, int xPos, int yPos) = 0;
     virtual void app_init() = 0;
-	virtual void motion(int x, int y, HWND* w) = 0;
 
     // returns true if a key is down
     bool is_key_down(unsigned key) {

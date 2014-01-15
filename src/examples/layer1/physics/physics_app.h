@@ -96,7 +96,7 @@ namespace octet {
 
     
       // make a mesh to share amoungst all boxes
-      box_mesh.make_rectangle(0.5f, 4.0f, 0.5f);
+      box_mesh.make_cube(0.5f);
       box_mat.make_color(vec4(1, 0, 0, 1), false, false);
 
       float floor_size = 50.0f;
@@ -104,7 +104,7 @@ namespace octet {
       floor_mat.make_color(vec4(0.3f, 1, 0.1f, 1), true, false);
 
       // make some boxes in the physics world with meshes for drawing.
-      int num_boxes = 1;
+      int num_boxes = 10;
       float box_spacing = 1.5f;
       boxes.resize(num_boxes+1);
 
@@ -113,7 +113,7 @@ namespace octet {
       modelToWorld.translate(-0.5f * box_spacing * (num_boxes-1), 4.0f, 0);
 
       for (int i = 0; i != num_boxes; ++i) {
-        int body = world.add_rigid_body(modelToWorld, vec4(0.5f, 4.0f, 0.5f, 0), true, physics_world::body_box);
+        int body = world.add_rigid_body(modelToWorld, vec4(0.5f, 0.5f, 0.5f, 0), true, physics_world::body_box);
         boxes[i].init(&box_mat, &box_mesh, body);
         modelToWorld.translate(box_spacing, 0, 0);
       }
@@ -173,10 +173,10 @@ namespace octet {
       }
 
       if (is_key_down('W')) {
-        boxes[0].accelerate(world, -0.5f);
+        boxes[0].accelerate(world, -0.1f);
       }
       if (is_key_down('S')) {
-        boxes[0].accelerate(world, 0.5f);
+        boxes[0].accelerate(world, 0.1f);
       }
       if (is_key_down(key_left)) {
         boxes[0].turn(world, 0.01f);

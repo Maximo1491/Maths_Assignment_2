@@ -70,7 +70,7 @@ namespace octet {
       normalized = 0;
 
       num_slots = 0;
-      index_type = GL_UNSIGNED_INT;
+      index_type = GL_UNSIGNED_SHORT;
       mode = GL_TRIANGLES;
 
       mesh_skin = _skin;
@@ -315,7 +315,6 @@ namespace octet {
 
     void draw() {
       indices->bind();
-			//glPolygonMode( GL_FRONT_AND_BACK, GL_LINE );
       glDrawElements(get_mode(), get_num_indices(), get_index_type(), (GLvoid*)0);
     }
 
@@ -337,17 +336,8 @@ namespace octet {
       mesh_builder b;
     
       b.init(6*4, 6*6);
-      b.add_cube(size);
-      b.get_mesh(*this);
-    }
 
-    void make_rectangle(float x = 1.0f, float y = 1.0f, float z = 1.0f) {
-      init();
-      mesh_builder b;
-    
-      b.init(6*4, 6*6);
-      b.add_cube(1.0f);
-      b.scale(x, y, z);
+      b.add_cube(size);
       b.get_mesh(*this);
     }
 
@@ -403,8 +393,8 @@ namespace octet {
       for (unsigned i = 0; i != source.get_num_vertices(); ++i) {
         vec4 pos = source.get_value(pos_slot, i);
         vec4 normal = source.get_value(normal_slot, i);
-        unsigned idx = builder.add_vertex(pos, normal, 0, 0, vec4(0,0,1,1));
-        builder.add_vertex(pos + normal * length, normal, 0, 0, vec4(0,0,1,1));
+        unsigned idx = builder.add_vertex(pos, normal, 0, 0);
+        builder.add_vertex(pos + normal * length, normal, 0, 0);
         builder.add_index(idx);
         builder.add_index(idx+1);
       }

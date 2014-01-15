@@ -172,13 +172,12 @@ namespace octet {
       return 0;
     }
 
-    void render(float *mixer, unsigned start, unsigned num_samples, unsigned num_channels, float gain) {
+    void render(float *mixer, unsigned start, unsigned num_samples, unsigned num_channels) {
       unsigned max_samples = get_max_samples();
       if (format == AL_FORMAT_MONO16) {
         int16_t *sp = (int16_t *)&data[0] + start;
-        float scale = gain * (1.0f/16384);
         for (unsigned i = 0; i != num_samples; ++i) {
-          float delta = *sp++ * scale;
+          float delta = *sp++ * (1.0f/16384);
           mixer[0] += delta;
           mixer[1] += delta;
           mixer += 2;
@@ -193,7 +192,6 @@ namespace octet {
     unsigned sample;
     unsigned state;
     unsigned looping;
-    float gain;
 
     void *access(unsigned param) {
       if (param == AL_SOURCE_STATE) {
@@ -204,8 +202,6 @@ namespace octet {
         return &buffer;
       } else if (param == AL_LOOPING) {
         return &looping;
-      } else if (param == AL_GAIN) {
-        return &gain;
       } else {
         return 0;
       }
@@ -219,7 +215,6 @@ namespace octet {
       sample = 0;
       looping = 0;
       buffer = 0;
-      gain = 1;
     }
 
     void add_ref() {
@@ -232,23 +227,13 @@ namespace octet {
       }
     }
 
-    void seti(unsigned param, unsigned value) {
+    void set(unsigned param, unsigned value) {
       unsigned *ptr = (unsigned*)access(param);
       *ptr = value;
     }
 
-    void setf(unsigned param, float value) {
-      float *ptr = (float*)access(param);
-      *ptr = value;
-    }
-
-    unsigned geti(unsigned param) {
+    unsigned get(unsigned param) {
       unsigned *ptr = (unsigned*)access(param);
-      return *ptr;
-    }
-
-    float getf(unsigned param) {
-      float *ptr = (float*)access(param);
       return *ptr;
     }
 
@@ -266,7 +251,7 @@ namespace octet {
           }
         }
         unsigned segment = num_samples < max_samples ? num_samples : max_samples;
-        buffer->render(mixer, sample, segment, num_channels, gain);
+        buffer->render(mixer, sample, segment, num_channels);
         sample += segment;
         num_samples -= segment;
       }
@@ -294,9 +279,9 @@ namespace octet {
         ALsource *src = sources[i];
         if (src) {
           // fill mixer
-          ALbuffer *buffer = get_buffer(src->geti(AL_BUFFER));
+          ALbuffer *buffer = get_buffer(src->get(AL_BUFFER));
           if (buffer) {
-            //fprintf(log, "i=%d b=%p b=%d ST=%04x s=%d\n", i, buffer, src->geti(AL_BUFFER), src->geti(AL_SOURCE_STATE), src->geti(AL_SAMPLE_OFFSET));
+            //fprintf(log, "i=%d b=%p b=%d ST=%04x s=%d\n", i, buffer, src->get(AL_BUFFER), src->get(AL_SOURCE_STATE), src->get(AL_SAMPLE_OFFSET));
             src->render(buffer, &mixer[0], mixer.size() / num_channels, num_channels);
           }
         }
@@ -564,9 +549,6 @@ namespace octet {
  
 
   inline void alSourcef( ALuint sid, ALenum param, ALfloat value ) {
-    ALCcontext *ctxt = Fake_AL_context();
-    ALsource *src = ctxt->get_source(sid);
-    src->setf(param, value);
   }
  
 
@@ -581,7 +563,7 @@ namespace octet {
   inline void alSourcei( ALuint sid, ALenum param, ALint value ) {
     ALCcontext *ctxt = Fake_AL_context();
     ALsource *src = ctxt->get_source(sid);
-    src->seti(param, value);
+    src->set(param, value);
   }
  
 
@@ -636,8 +618,8 @@ namespace octet {
     ALCcontext *ctxt = Fake_AL_context();
     ALsource *src = ctxt->get_source(sid);
     if (src) {
-      src->seti(AL_SAMPLE_OFFSET, 0);
-      src->seti(AL_SOURCE_STATE, AL_PLAYING);
+      src->set(AL_SAMPLE_OFFSET, 0);
+      src->set(AL_SOURCE_STATE, AL_PLAYING);
     }
   }
 
@@ -645,7 +627,7 @@ namespace octet {
     ALCcontext *ctxt = Fake_AL_context();
     ALsource *src = ctxt->get_source(sid);
     if (src) {
-      src->seti(AL_SOURCE_STATE, AL_STOPPED);
+      src->set(AL_SOURCE_STATE, AL_STOPPED);
     }
   }
 
@@ -654,7 +636,7 @@ namespace octet {
     ALCcontext *ctxt = Fake_AL_context();
     ALsource *src = ctxt->get_source(sid);
     if (src) {
-      src->seti(AL_SAMPLE_OFFSET, 0);
+      src->set(AL_SAMPLE_OFFSET, 0);
     }
   }
 
@@ -663,7 +645,7 @@ namespace octet {
     ALCcontext *ctxt = Fake_AL_context();
     ALsource *src = ctxt->get_source(sid);
     if (src) {
-      src->seti(AL_SOURCE_STATE, AL_PAUSED);
+      src->set(AL_SOURCE_STATE, AL_PAUSED);
     }
   }
 
