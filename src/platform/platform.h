@@ -151,9 +151,9 @@ static char *get_sprintf_buffer() {
 #define CX 16
 #define CY 16
 #define CZ 16
-#define SCX 8
+#define SCX 16
 #define SCY 8
-#define SCZ 8
+#define SCZ 16
 #include "../math/chunk.h"
 #include "../math/super_chunk.h"
 
