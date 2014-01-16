@@ -349,6 +349,18 @@
     <ClInclude Include="..\..\src\examples\layer2\thronecraft\ThroneCraft.h">
       <Filter>Source Files</Filter>
     </ClInclude>
+    <ClInclude Include="..\..\src\math\tree_generator.h">
+      <Filter>octet\math</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\src\scene\UI_Element.h">
+      <Filter>octet\scene</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\src\shaders\ui_shader.h">
+      <Filter>octet\shaders</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\src\shaders\tree_shader.h">
+      <Filter>octet\shaders</Filter>
+    </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <None Include="..\..\src\resources\mesh_builder.inl">

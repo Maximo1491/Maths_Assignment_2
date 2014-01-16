@@ -11,9 +11,8 @@ namespace octet
 		int elements;
     //If the chunk has been changed then redraw it
 		bool changed;
-    //Used to store the vertices and colour
+    //Used to store the vertices, normals, and colour
 		typedef glm::detail::tvec4<GLbyte> byte4;
-
 		typedef glm::detail::tvec3<GLbyte> byte3;
 		
 		chunk() 

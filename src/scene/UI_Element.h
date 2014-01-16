@@ -31,8 +31,8 @@ namespace octet {
 			windowH = wh;
 
 			scale = glm::scale(glm::mat4(1.0), glm::vec3(width / windowW, height / windowH, 0));
-			float x_pos = -1.0 + ((x / (windowW*0.5f)) + (width / windowW));
-			float y_pos = 1.0 - ((y / (windowH*0.5f)) + (height / windowH));
+			float x_pos = -1.0f + ((x / (windowW*0.5f)) + (width / windowW));
+			float y_pos = 1.0f - ((y / (windowH*0.5f)) + (height / windowH));
 			pos = glm::translate(glm::mat4(1.0), glm::vec3(x_pos, y_pos, 0));
 
 			matrix = pos * scale;
@@ -70,8 +70,8 @@ namespace octet {
       y = y_;
 
       scale = glm::scale(glm::mat4(1.0), glm::vec3(width / windowW, height / windowH, 0));
-			float x_pos = -1.0 + ((x / (windowW*0.5f)) + (width / windowW));
-			float y_pos = 1.0 - ((y / (windowH*0.5f)) + (height / windowH));
+			float x_pos = -1.0f + ((x / (windowW*0.5f)) + (width / windowW));
+			float y_pos = 1.0f - ((y / (windowH*0.5f)) + (height / windowH));
 			pos = glm::translate(glm::mat4(1.0), glm::vec3(x_pos, y_pos, 0));
 
 			matrix = pos * scale;

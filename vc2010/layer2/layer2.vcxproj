@@ -60,6 +60,7 @@
     <ClInclude Include="..\..\src\math\ray.h" />
     <ClInclude Include="..\..\src\math\scalar.h" />
     <ClInclude Include="..\..\src\math\super_chunk.h" />
+    <ClInclude Include="..\..\src\math\tree_generator.h" />
     <ClInclude Include="..\..\src\math\vec2.h" />
     <ClInclude Include="..\..\src\math\vec3.h" />
     <ClInclude Include="..\..\src\math\vec4.h" />
@@ -105,12 +106,15 @@
     <ClInclude Include="..\..\src\scene\skeleton.h" />
     <ClInclude Include="..\..\src\scene\skin.h" />
     <ClInclude Include="..\..\src\scene\smooth.h" />
+    <ClInclude Include="..\..\src\scene\UI_Element.h" />
     <ClInclude Include="..\..\src\scene\wireframe.h" />
     <ClInclude Include="..\..\src\shaders\bump_shader.h" />
     <ClInclude Include="..\..\src\shaders\color_shader.h" />
     <ClInclude Include="..\..\src\shaders\phong_shader.h" />
     <ClInclude Include="..\..\src\shaders\shader.h" />
     <ClInclude Include="..\..\src\shaders\texture_shader.h" />
+    <ClInclude Include="..\..\src\shaders\tree_shader.h" />
+    <ClInclude Include="..\..\src\shaders\ui_shader.h" />
     <ClInclude Include="..\..\src\tinyxml\tinystr.h" />
     <ClInclude Include="..\..\src\tinyxml\tinyxml.h" />
   </ItemGroup>
@@ -170,6 +174,7 @@
       <LargeAddressAware>
       </LargeAddressAware>
       <StackReserveSize>2048000</StackReserveSize>
+      <AdditionalDependencies>SOIL.lib;kernel32.lib;user32.lib;gdi32.lib;winspool.lib;comdlg32.lib;advapi32.lib;shell32.lib;ole32.lib;oleaut32.lib;uuid.lib;odbc32.lib;odbccp32.lib;%(AdditionalDependencies)</AdditionalDependencies>
     </Link>
   </ItemDefinitionGroup>
   <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">

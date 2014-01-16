@@ -37,6 +37,7 @@
 #include <assert.h>
 #include <time.h>
 #include <iostream>
+#include <vector>
 
 // xml library
 #include "../tinyxml/tinystr.cpp"
@@ -136,6 +137,7 @@ static char *get_sprintf_buffer() {
 #include "../resources/gl_resource.h"
 #include "../resources/bitmap_font.h"
 #include "../resources/mesh_builder.h"
+#include "../resources/SOIL/SOIL.h"
 
 // shaders
 #include "../shaders/shader.h"
@@ -145,6 +147,7 @@ static char *get_sprintf_buffer() {
 #include "../shaders/bump_shader.h"
 #include "../shaders/my_shader.h"
 #include "../shaders/ui_shader.h"
+#include "../shaders/tree_shader.h"
 #include "../physics/physics.h"
 
 //Thronecraft
@@ -156,6 +159,9 @@ static char *get_sprintf_buffer() {
 #define SCZ 16
 #include "../math/chunk.h"
 #include "../math/super_chunk.h"
+
+//Tree Generator
+#include "../math/tree_generator.h"
 
 // scene
 #include "../scene/scene_node.h"

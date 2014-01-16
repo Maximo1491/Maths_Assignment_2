@@ -157,12 +157,12 @@ namespace octet {
 			RECT console;
 			HWND hConsole = GetConsoleWindow();
 			GetWindowRect(hConsole, &console);
-			MoveWindow(hConsole, 10, (desktop.bottom*0.5) - (console.bottom*0.5), console.right*0.7, console.bottom*0.7, TRUE);
+			MoveWindow(hConsole, 10, (int)((desktop.bottom * 0.5f) - (console.bottom * 0.5f)), (int)(console.right * 0.7f), (int)(console.bottom * 0.7f), TRUE);
 
 			if(desktop.right == 1920 && desktop.bottom == 1080)
       {
 				window_handle = CreateWindow(L"MyClass", L"Thronecraft",
-				  WS_OVERLAPPEDWINDOW, console.right*0.7 + 20, 10, 900, 900,
+				  WS_OVERLAPPEDWINDOW, (int)(console.right * 0.7f + 20), 10, 900, 900,
 				  NULL, NULL, wndclass.hInstance, (LPVOID)this
 				);
 			}
