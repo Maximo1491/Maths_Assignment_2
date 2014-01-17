@@ -794,15 +794,15 @@ namespace octet
 							if (j < branchSubSections - 1)
 							{
 								inds[0 + (j * 6) + (i * branchSubSections * 6) + (currentHeight * branchSubSections * 6)] = 
-									(j + branchSubSections + (i * branchSubSections) + (currentHeight * branchSubSections));
-								inds[1 + (j * 6) + (i  * branchSubSections * 6) + (currentHeight * branchSubSections * 6)] = 
 									(j + (i * branchSubSections) + (currentHeight * branchSubSections));
+								inds[1 + (j * 6) + (i  * branchSubSections * 6) + (currentHeight * branchSubSections * 6)] = 
+                  (j + branchSubSections + (i * branchSubSections) + (currentHeight * branchSubSections));
 								inds[2 + (j * 6) + (i  * branchSubSections * 6) + (currentHeight * branchSubSections * 6)] = 
 									(1 + j + (i  * branchSubSections) + (currentHeight * branchSubSections));
 								inds[3 + (j * 6) + (i * branchSubSections * 6) + (currentHeight * branchSubSections * 6)] = 
-									(1 + j + (i * branchSubSections) + (currentHeight * branchSubSections));
-								inds[4 + (j * 6) + (i * branchSubSections * 6) + (currentHeight * branchSubSections * 6)] = 
 									(j + (branchSubSections + 1) + (i * branchSubSections) + (currentHeight * branchSubSections));
+								inds[4 + (j * 6) + (i * branchSubSections * 6) + (currentHeight * branchSubSections * 6)] = 
+                  (1 + j + (i * branchSubSections) + (currentHeight * branchSubSections));
 								inds[5 + (j * 6) + (i * branchSubSections * 6) + (currentHeight * branchSubSections * 6)] = 
 									(j + branchSubSections + (i * branchSubSections) + (currentHeight * branchSubSections));
 							}
@@ -810,15 +810,15 @@ namespace octet
 							else if (j == branchSubSections - 1)
 							{
 								inds[0 + (j * 6) + (i * branchSubSections * 6) + (currentHeight * branchSubSections * 6)] = 
-									(j + branchSubSections + (i * branchSubSections) + (currentHeight * branchSubSections));
-								inds[1 + (j * 6) + (i  * branchSubSections * 6) + (currentHeight * branchSubSections * 6)] = 
 									(j + (i * branchSubSections) + (currentHeight * branchSubSections));
+								inds[1 + (j * 6) + (i  * branchSubSections * 6) + (currentHeight * branchSubSections * 6)] = 
+                  (j + branchSubSections + (i * branchSubSections) + (currentHeight * branchSubSections));
 								inds[2 + (j * 6) + (i  * branchSubSections * 6) + (currentHeight * branchSubSections * 6)] = 
 									(1 + j - branchSubSections + (i  * branchSubSections) + (currentHeight * branchSubSections));
 								inds[3 + (j * 6) + (i * branchSubSections * 6) + (currentHeight * branchSubSections * 6)] = 
-									(1 + j - branchSubSections + (i  * branchSubSections) + (currentHeight * branchSubSections));
-								inds[4 + (j * 6) + (i * branchSubSections * 6) + (currentHeight * branchSubSections * 6)] = 
 									(j + 1 + (i * branchSubSections) + (currentHeight * branchSubSections));
+								inds[4 + (j * 6) + (i * branchSubSections * 6) + (currentHeight * branchSubSections * 6)] = 
+                  (1 + j - branchSubSections + (i  * branchSubSections) + (currentHeight * branchSubSections));
 								inds[5 + (j * 6) + (i * branchSubSections * 6) + (currentHeight * branchSubSections * 6)] = 
 									(j + branchSubSections + (i * branchSubSections) + (currentHeight * branchSubSections));
 							}
