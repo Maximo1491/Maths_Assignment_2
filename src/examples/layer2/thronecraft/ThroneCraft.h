@@ -69,6 +69,7 @@ namespace octet
     };
 
     ui_element ui[num_elements];
+		noise terrainNoise;
 
     ThroneCraft(int argc, char **argv) : app(argc, argv) { }
 
@@ -83,7 +84,7 @@ namespace octet
       tg->AddTree(tree_generator::alive, model);
 
       //player position & gravity
-      position = glm::vec3(0, 0, -40);
+      position = glm::vec3(0, 60, -40);
       gravity = false;
 
       //Get window width and height for UI elements
@@ -134,97 +135,42 @@ namespace octet
 
       c = new superChunk();
 
-      /*std::cout << glm::round(fabs(noise(0, 0))*128) << "\n";
-      std::cout << glm::round(fabs(noise(1, 0))*128) << "\n";
-      std::cout << glm::round(fabs(noise(2, 0))*128) << "\n";
-      std::cout << glm::round(fabs(noise(3, 0))*128) << "\n";
-      std::cout << glm::round(fabs(noise(4, 0))*128) << "\n";
-      std::cout << glm::round(fabs(noise(5, 0))*128) << "\n";
-      std::cout << glm::round(fabs(noise(6, 0))*128) << "\n";*/
-
-      render_surface(256, 256, 75, 0.5);
+      generateTerrain(0, 0, 256, 256, 75, 0.25);
 
       //Start by selecting a grass block
       selectedBlock = grass;
-
-      chunksX = SCX;
-      chunksY = SCY;
-      chunksZ = SCZ;
-
-      //Loops through 1 chunk and creates either a type 1 or type 2,
-      //uncomment the SCX stuff to fill the whole superChunk
-      for(int x = 0; x < CX * chunksX/* *SCX */; x++)
-      {
-        for(int y = 0; y < CY * chunksY/2/* *SCY */; y++)
-        {
-          //if(y < i)
-          {
-            for(int z = 0; z < CZ * chunksZ/* *SCZ */; z++)
-            {
-              //c->set(x,y,z, 1);
-            }
-          }
-        }
-      }
     }
 
-    inline double findnoise2(double x,double y)
-    {
-      int n=(int)x+(int)y*57;
-      n=(n<<13)^n;
-      int nn=(n*(n*n*60493+19990303)+1376312589)&0x7fffffff;
-      return 1.0-((double)nn/1073741824.0);
-    }
-
-    inline double interpolate(double a,double b,double x)
-    {
-      double ft=x * 3.1415927;
-      double f=(1.0-cos(ft))* 0.5;
-      return a*(1.0-f)+b*f;
-    }
-
-    double noise(double x,double y)
-    {
-      double floorx=(double)((int)x);//This is kinda a cheap way to floor a double integer.
-      double floory=(double)((int)y);
-      double s,t,u,v;//Integer declaration
-      s=findnoise2(floorx,floory); 
-      t=findnoise2(floorx+1,floory);
-      u=findnoise2(floorx,floory+1);//Get the surrounding pixels to calculate the transition.
-      v=findnoise2(floorx+1,floory+1);
-      double int1=interpolate(s,t,x-floorx);//Interpolate between the values.
-      double int2=interpolate(u,v,x-floorx);//Here we use x-floorx, to get 1st dimension. Don't mind the x-floorx thingie, it's part of the cosine formula.
-      return interpolate(int1,int2,y-floory);//Here we use y-floory, to get the 2nd dimension.
-    }
-
-    void render_surface(int w, int h, double zoom, double p)
+    void generateTerrain(int xPos, int zPos, int width, int depth, float zoom, float persistance)
     {
       int octaves = 2;
 
-      for(int y = 256; y < h*2; y++)
+			for (int z = zPos; z < zPos + depth; z++)
       {
-        for(int x = 256; x < w*2; x++)
+				for (int x = xPos; x < xPos + width; x++)
         {
-          double getnoise = 0;
-          for(double a = 0; a < octaves-1; a++)
-          {
-            double frequency = pow(2, a);
-            double amplitude = pow(p, a);
+					float total = 0;
 
-            getnoise += noise(((double)x)*frequency/zoom, ((double)y)/zoom*frequency)*amplitude;
-          }
-          int height = (int)((getnoise*64.0)+64.0);
-          //std::cout << "X: " << x << " Y: " << y << " Height: " << height << "\n";
-          for(int i = 0; i <= height; i++)
+          for(float a = 0; a < octaves-1; a++)
           {
-            if(i == height && height > 100)
-              c->set(x-256, i, y-256, snow);
-            else if( i >= height - 2)
-              c->set(x-256, i, y-256, grass);
-            else if( i >= height - 6)
-              c->set(x-256, i, y-256, dirt);
+            float frequency = glm::pow(2.0f, a);
+            float amplitude = glm::pow(persistance, a);
+
+						total += terrainNoise.getNoise(x * frequency / zoom, z / zoom * frequency) * amplitude;
+          }
+
+					int y = (total*64.0) + 64.0; //Creates a height between 0-128
+
+          for(int i = 0; i <= y; i++)
+          {
+            if(i == y && y > 100)
+              c->set(x, i, z, snow);
+            else if( i >= y - 2)
+							c->set(x, i, z, grass);
+            else if( i >= y - 6)
+							c->set(x, i, z, dirt);
             else
-              c->set(x-256, i, y-256, stone);
+							c->set(x, i, z, stone);
           }
         }
       }

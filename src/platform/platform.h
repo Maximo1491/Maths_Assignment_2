@@ -88,6 +88,9 @@ static char *get_sprintf_buffer() {
   #include "glut_specific.h"
 #endif
 
+#include "../../lib/glm/glm.hpp"
+#include "../../lib/glm/gtc/matrix_transform.hpp"
+#include "../../lib/glm/gtc/type_ptr.hpp"
 #include "../math/scalar.h"
 #include "../math/rational.h"
 #include "../math/vec2.h"
@@ -102,9 +105,7 @@ static char *get_sprintf_buffer() {
 #include "../math/aabb.h"
 #include "../math/ray.h"
 #include "../math/random.h"
-#include "../../lib/glm/glm.hpp"
-#include "../../lib/glm/gtc/matrix_transform.hpp"
-#include "../../lib/glm/gtc/type_ptr.hpp"
+#include "../math/noise.h"
 
 // CG, GLSL, C++ compiler
 #include "../compiler/cpp_error.h"
