@@ -44,9 +44,29 @@ namespace octet {
 
     void render(glm::mat4 &modelToProjection) 
 	{
-      shader::render();
+		shader::render();
 
-      glUniformMatrix4fv( modelToProjectionIndex_, 1, GL_FALSE, &modelToProjection[0][0] );
+		mat4t modelToWorld;
+		modelToWorld[0][0] = modelToProjection[0].x;
+		modelToWorld[0][1] = modelToProjection[0].y;
+		modelToWorld[0][2] = modelToProjection[0].z;
+		modelToWorld[0][3] = modelToProjection[0].w;
+		modelToWorld[1][0] = modelToProjection[1].x;
+		modelToWorld[1][1] = modelToProjection[1].y;
+		modelToWorld[1][2] = modelToProjection[1].z;
+		modelToWorld[1][3] = modelToProjection[1].w;
+		modelToWorld[2][0] = modelToProjection[2].x;
+		modelToWorld[2][1] = modelToProjection[2].y;
+		modelToWorld[2][2] = modelToProjection[2].z;
+		modelToWorld[2][3] = modelToProjection[2].w;
+		modelToWorld[3][0] = modelToProjection[3].x;
+		modelToWorld[3][1] = modelToProjection[3].y;
+		modelToWorld[3][2] = modelToProjection[3].z;
+		modelToWorld[3][3] = modelToProjection[3].w;
+
+		modelToWorld.transpose4x4();
+
+		glUniformMatrix4fv( modelToProjectionIndex_, 1, GL_FALSE, modelToWorld.get() );
     }
   };
 }

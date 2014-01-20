@@ -54,6 +54,7 @@
     <ClInclude Include="..\..\src\math\chunk.h" />
     <ClInclude Include="..\..\src\math\ivec4.h" />
     <ClInclude Include="..\..\src\math\mat4t.h" />
+    <ClInclude Include="..\..\src\math\noise.h" />
     <ClInclude Include="..\..\src\math\quat.h" />
     <ClInclude Include="..\..\src\math\random.h" />
     <ClInclude Include="..\..\src\math\rational.h" />

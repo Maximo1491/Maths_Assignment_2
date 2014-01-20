@@ -9,6 +9,6 @@ Rule
 Angle
 60
 Iterations
-1
+5
 Max Iterations
 10

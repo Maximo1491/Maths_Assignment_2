@@ -20,7 +20,7 @@ namespace octet
 		};
 
 		//Declare all variables here
-		int iterations, maxIterations, ignoreSize, numberOfBranches, branchSubSections;
+		int iterations, maxIterations, ignoreSize, numberOfBranches, branchSubSections, totalHeight;
 		float height, width, depth, branchRadius, angle, leafWidth;
 		string originalAxiom, ignore;
 		bool isKeyPressed, cameraReset;
@@ -33,6 +33,10 @@ namespace octet
 
 		GLuint vbo, lbo, ibo, cbo, tbo, program, *textures;
 		GLint attribute_position, attribute_v_color, attribute_tex, uniform_matrix;
+
+		//std::vector<GLfloat> vertices, colors;
+		//std::vector<GLushort> indices, texCoords;
+		int verticesSize, leafSize, indicesSize, colorsSize, texCoordsSize;
 
 	public:
 
@@ -55,6 +59,14 @@ namespace octet
 			leafWidth = 10 * width;
 			branchRadius = 0.05f;
 			branchSubSections = 8;
+
+			//Initialize the size variables.
+			verticesSize = 0;
+			indicesSize = 0;
+			leafSize = 0;
+			colorsSize = 0;
+			texCoordsSize = 0;
+			totalHeight = 0;
 
 			//Load the necessary buffers to be used.
 			//vbo shall be used for vertices.
@@ -113,20 +125,20 @@ namespace octet
 		{
 			tree_shader_.render(projection);
 
-			glEnable(GL_CULL_FACE);
+			//glEnable(GL_CULL_FACE);
 			glEnable(GL_DEPTH_TEST);
 
 			glEnableVertexAttribArray(attribute_pos);
 			glEnableVertexAttribArray(attribute_uv);
-			glEnableVertexAttribArray(attribute_color);
+			//glEnableVertexAttribArray(attribute_color);
 
 			glBindTexture(GL_TEXTURE_2D, textures[0]);
 
 			glBindBuffer(GL_ARRAY_BUFFER, vbo);
 			glVertexAttribPointer(attribute_pos, 4, GL_FLOAT, GL_FALSE, sizeof(GLfloat) * 4, 0);
 
-			glBindBuffer(GL_ARRAY_BUFFER, cbo);
-			glVertexAttribPointer(attribute_color, 4, GL_FLOAT, GL_FALSE, sizeof(GLfloat) * 4, 0);
+			//glBindBuffer(GL_ARRAY_BUFFER, cbo);
+			//glVertexAttribPointer(attribute_color, 4, GL_FLOAT, GL_FALSE, sizeof(GLfloat) * 4, 0);
 
 			glBindBuffer(GL_ARRAY_BUFFER, tbo);
 			glVertexAttribPointer(attribute_uv, 2, GL_UNSIGNED_SHORT, GL_FALSE, sizeof(GLushort) * 2, 0);
@@ -141,6 +153,10 @@ namespace octet
 
 			//Draw the indices into the window.
 			glDrawElements(GL_TRIANGLES, size/sizeof(GLushort), GL_UNSIGNED_SHORT, 0);
+
+			glDisableVertexAttribArray(attribute_pos);
+			glDisableVertexAttribArray(attribute_uv);
+			//glDisableVertexAttribArray(attribute_color);
 		}
 
 		//A command to generate another tree.
@@ -527,6 +543,8 @@ namespace octet
 			treeBox->modelToWorld[3][2] = origin[3].z;
 			treeBox->modelToWorld[3][3] = origin[3].w;
 
+			treeBox->modelToWorld.transpose4x4();
+
 			treeBox->branchStartPoint = treeBox->modelToWorld.row(3);
 
 			mat4t modelToWorld = treeBox->modelToWorld;
@@ -544,14 +562,14 @@ namespace octet
 				if (formula[i] == 'F')
 				{
 					vec4 branchVector = modelToWorld.row(3) - treeBox->branchStartPoint;
-					float branchMagnitude = sqrt(pow(branchVector[0], 2) + pow(branchVector[1], 2) + pow(branchVector[3], 2));
+					//float branchMagnitude = sqrt(pow(branchVector[0], 2) + pow(branchVector[1], 2) + pow(branchVector[3], 2));
 
-					if (treeBox->branchHeight <= floor((branchMagnitude / 2.0) + 0.5))
-					{
+					//if (treeBox->branchHeight <= floor((branchMagnitude / 2.0) + 0.5))
+					//{
 						treeBox->branchHeight++;
 						treeBox->modelToWorld.translate(0, height, 0);
 						totalTreeHeight++;
-					}
+					//}
 
 					modelToWorld.translate(0, height * 2.0f, 0);
 				}
@@ -712,6 +730,8 @@ namespace octet
 			modelToWorld[3][2] = origin[3].z;
 			modelToWorld[3][3] = origin[3].w;
 
+			modelToWorld.transpose4x4();
+
 			//Keep track of the number of branches that we have calculated.
 			numberOfBranches = 0;
 
@@ -719,14 +739,14 @@ namespace octet
 			GLfloat *verts = new GLfloat[totalTreeHeight * branchSubSections * 4];
 			//GLfloat *leafVertices = new GLfloat[formedTree.size() * 12 * 4];
 			GLushort *inds = new GLushort[totalTreeHeight * branchSubSections * 6];
-			GLfloat *colors = new GLfloat[totalTreeHeight * branchSubSections * 4];
+			//GLfloat *cols = new GLfloat[totalTreeHeight * branchSubSections * 4];
 			GLushort *texCs = new GLushort[totalTreeHeight * branchSubSections * 2];
 
 			//Keep track of the number of elements in each array.
 			int vertsSize = totalTreeHeight * branchSubSections * 4;
 			//int leafSize = formedTree.size() * 48 * 4;
 			int indsSize = totalTreeHeight * branchSubSections * 6;
-			int colorsSize = totalTreeHeight * branchSubSections * 4;
+			//int colsSize = totalTreeHeight * branchSubSections * 4;
 			int texCsSize = totalTreeHeight * branchSubSections * 2;
 
 			float angleOffset = 360.0f / branchSubSections;
@@ -770,19 +790,27 @@ namespace octet
 						else
 							texCoordX = 1;
 
-						vec4 vert = vec4(currentRadius * cos(currentAngle * 0.0174532925f), ((float)i * 2.0f) - (*iter)->branchHeight, currentRadius * sin(currentAngle * 0.0174532925f), 1.0f);
+						vec4 vert = vec4(currentRadius * cos(currentAngle * 0.0174532925f), ((float)i * (height * 2.0f)) - (*iter)->branchHeight, currentRadius * sin(currentAngle * 0.0174532925f), 1.0f);
 
 						vert = vert * (*iter)->modelToWorld;
+
+						mat4t testMat;
+						testMat.loadIdentity();
+						testMat[0][0] = 0.25f;
+						testMat[1][1] = 0.25f;
+						testMat[2][2] = 0.25f;
+
+						vert = vert * testMat;
 
 						verts[0 + (j * 4) + (i * branchSubSections * 4) + (currentHeight * branchSubSections * 4)] = vert.x();
 						verts[1 + (j * 4) + (i * branchSubSections * 4) + (currentHeight * branchSubSections * 4)] = vert.y();
 						verts[2 + (j * 4) + (i * branchSubSections * 4) + (currentHeight * branchSubSections * 4)] = vert.z();
 						verts[3 + (j * 4) + (i * branchSubSections * 4) + (currentHeight * branchSubSections * 4)] = vert.w();
 
-						colors[0 + (j * 4) + (i * branchSubSections * 4) + (currentHeight * branchSubSections * 4)] = 1.0f;
-						colors[1 + (j * 4) + (i * branchSubSections * 4) + (currentHeight * branchSubSections * 4)] = 0.0f;
-						colors[2 + (j * 4) + (i * branchSubSections * 4) + (currentHeight * branchSubSections * 4)] = 0.0f;
-						colors[3 + (j * 4) + (i * branchSubSections * 4) + (currentHeight * branchSubSections * 4)] = 1.0f;
+						//colors[0 + (j * 4) + (i * branchSubSections * 4) + (currentHeight * branchSubSections * 4)] = 1.0f;
+						//colors[1 + (j * 4) + (i * branchSubSections * 4) + (currentHeight * branchSubSections * 4)] = 0.0f;
+						//colors[2 + (j * 4) + (i * branchSubSections * 4) + (currentHeight * branchSubSections * 4)] = 0.0f;
+						//colors[3 + (j * 4) + (i * branchSubSections * 4) + (currentHeight * branchSubSections * 4)] = 1.0f;
 
 						texCs[0 + (j * 2) + (i * branchSubSections * 2) + (currentHeight * branchSubSections * 2)] = texCoordX;
 						texCs[1 + (j * 2) + (i * branchSubSections * 2) + (currentHeight * branchSubSections * 2)] = texCoordY;
@@ -794,33 +822,33 @@ namespace octet
 							if (j < branchSubSections - 1)
 							{
 								inds[0 + (j * 6) + (i * branchSubSections * 6) + (currentHeight * branchSubSections * 6)] = 
-									(j + (i * branchSubSections) + (currentHeight * branchSubSections));
+									(j + (i * branchSubSections) + (currentHeight * branchSubSections) + (totalHeight * branchSubSections));
 								inds[1 + (j * 6) + (i  * branchSubSections * 6) + (currentHeight * branchSubSections * 6)] = 
-                  (j + branchSubSections + (i * branchSubSections) + (currentHeight * branchSubSections));
+									(j + branchSubSections + (i * branchSubSections) + (currentHeight * branchSubSections) + (totalHeight * branchSubSections));
 								inds[2 + (j * 6) + (i  * branchSubSections * 6) + (currentHeight * branchSubSections * 6)] = 
-									(1 + j + (i  * branchSubSections) + (currentHeight * branchSubSections));
+									(1 + j + (i  * branchSubSections) + (currentHeight * branchSubSections) + (totalHeight * branchSubSections));
 								inds[3 + (j * 6) + (i * branchSubSections * 6) + (currentHeight * branchSubSections * 6)] = 
-									(j + (branchSubSections + 1) + (i * branchSubSections) + (currentHeight * branchSubSections));
+									(j + (branchSubSections + 1) + (i * branchSubSections) + (currentHeight * branchSubSections) + (totalHeight * branchSubSections));
 								inds[4 + (j * 6) + (i * branchSubSections * 6) + (currentHeight * branchSubSections * 6)] = 
-                  (1 + j + (i * branchSubSections) + (currentHeight * branchSubSections));
+									(1 + j + (i * branchSubSections) + (currentHeight * branchSubSections) + (totalHeight * branchSubSections));
 								inds[5 + (j * 6) + (i * branchSubSections * 6) + (currentHeight * branchSubSections * 6)] = 
-									(j + branchSubSections + (i * branchSubSections) + (currentHeight * branchSubSections));
+									(j + branchSubSections + (i * branchSubSections) + (currentHeight * branchSubSections) + (totalHeight * branchSubSections));
 							}
 
 							else if (j == branchSubSections - 1)
 							{
 								inds[0 + (j * 6) + (i * branchSubSections * 6) + (currentHeight * branchSubSections * 6)] = 
-									(j + (i * branchSubSections) + (currentHeight * branchSubSections));
+									(j + (i * branchSubSections) + (currentHeight * branchSubSections) + (totalHeight * branchSubSections));
 								inds[1 + (j * 6) + (i  * branchSubSections * 6) + (currentHeight * branchSubSections * 6)] = 
-                  (j + branchSubSections + (i * branchSubSections) + (currentHeight * branchSubSections));
+									(j + branchSubSections + (i * branchSubSections) + (currentHeight * branchSubSections) + (totalHeight * branchSubSections));
 								inds[2 + (j * 6) + (i  * branchSubSections * 6) + (currentHeight * branchSubSections * 6)] = 
-									(1 + j - branchSubSections + (i  * branchSubSections) + (currentHeight * branchSubSections));
+									(1 + j - branchSubSections + (i  * branchSubSections) + (currentHeight * branchSubSections) + (totalHeight * branchSubSections));
 								inds[3 + (j * 6) + (i * branchSubSections * 6) + (currentHeight * branchSubSections * 6)] = 
-									(j + 1 + (i * branchSubSections) + (currentHeight * branchSubSections));
+									(j + 1 + (i * branchSubSections) + (currentHeight * branchSubSections) + (totalHeight * branchSubSections));
 								inds[4 + (j * 6) + (i * branchSubSections * 6) + (currentHeight * branchSubSections * 6)] = 
-                  (1 + j - branchSubSections + (i  * branchSubSections) + (currentHeight * branchSubSections));
+									(1 + j - branchSubSections + (i  * branchSubSections) + (currentHeight * branchSubSections) + (totalHeight * branchSubSections));
 								inds[5 + (j * 6) + (i * branchSubSections * 6) + (currentHeight * branchSubSections * 6)] = 
-									(j + branchSubSections + (i * branchSubSections) + (currentHeight * branchSubSections));
+									(j + branchSubSections + (i * branchSubSections) + (currentHeight * branchSubSections) + (totalHeight * branchSubSections));
 							}
 						}
 					}
@@ -833,43 +861,90 @@ namespace octet
 				currentHeight += (int)(*iter)->branchHeight;
 			}
 
-			//Bind an arraybuffer to the vbo for vertices.  Load the vertices array into 
-			//the array buffer.
-			glBindBuffer(GL_ARRAY_BUFFER, vbo);
-			glBufferData(GL_ARRAY_BUFFER, vertsSize * sizeof(GLfloat), verts, GL_STATIC_DRAW);
+			totalHeight += currentHeight;
+			verticesSize += vertsSize;
 
-			//Bind an array buffer to the cbo for colors.  Load the colors array into
-			//the array buffer.
-			glBindBuffer(GL_ARRAY_BUFFER, cbo);
-			glBufferData(GL_ARRAY_BUFFER, colorsSize * sizeof(GLfloat), colors, GL_STATIC_DRAW);
+			for (int i = 0; i < vertsSize; i++)
+				vertices.push_back(verts[i]);
 
-			glBindBuffer(GL_ARRAY_BUFFER, tbo);
-			glBufferData(GL_ARRAY_BUFFER, texCsSize * sizeof(GLushort), texCs, GL_STATIC_DRAW);
+			//colorsSize += colsSize;
+
+			//for (int i = 0; i < colsSize; i++)
+				//colors.push_back(cols[i]);
+
+			indicesSize += indsSize;
+
+			for (int i = 0; i < indsSize; i++)
+				indices.push_back(inds[i]);
+
+			texCoordsSize += texCsSize;
+
+			for (int i = 0; i < texCsSize; i++)
+				texCoords.push_back(texCs[i]);
 			
-			//Bind an element array buffer to the ibo for indices.  Load the indices
-			//into the element array buffer.
-			glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, ibo);
-			glBufferData(GL_ELEMENT_ARRAY_BUFFER, indsSize * sizeof(GLushort), inds, GL_STATIC_DRAW);
-
-			//glBindBuffer(GL_ARRAY_BUFFER, lbo);
-			//glBufferData(GL_ARRAY_BUFFER, leafSize, leafVertices, GL_STATIC_DRAW);
-
-			//for (int i = 0; i < vertsSize; i++)
-				//vertices.push_back(verts[i]);
-
-			//for (int i = 0; i < indsSize; i++)
-				//indices.push_back(inds[i]);
-
-			//for (int i = 0; i < texCsSize; i++)
-				//texCoords.push_back(texCs[i]);
-
 			//Release the arrays created as they are loaded into the buffers.
 			//This prevents memory leaks.
 			delete[] verts;
 			//delete[] leafVertices;
-			delete[] colors;
+			//delete[] colors;
 			delete[] inds;
 			delete[] texCs;
+
+			ClearTreeForm(formedTree);
+			ClearFormula();
+			LoadOriginalAxiom();
+		}
+
+		void PrepareTrees()
+		{
+			GLfloat* vs = new GLfloat[verticesSize];
+			GLushort* is = new GLushort[indicesSize];
+			GLushort* ts = new GLushort[texCoordsSize];
+
+			for (int i = 0; i < verticesSize; i++)
+				vs[i] = vertices[i];
+
+			for (int i = 0; i < indicesSize; i++)
+				is[i] = indices[i];
+
+			for (int i = 0; i < texCoordsSize; i++)
+				ts[i] = texCoords[i];
+
+			glBindBuffer(GL_ARRAY_BUFFER, vbo);
+			glBufferData(GL_ARRAY_BUFFER, verticesSize * sizeof(GLfloat), vs, GL_STATIC_DRAW);
+
+			glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, ibo);
+			glBufferData(GL_ELEMENT_ARRAY_BUFFER, indicesSize * sizeof(GLushort), is, GL_STATIC_DRAW);
+
+			glBindBuffer(GL_ARRAY_BUFFER, tbo);
+			glBufferData(GL_ARRAY_BUFFER, texCoordsSize * sizeof(GLushort), ts, GL_STATIC_DRAW);
+
+			delete[] vs;
+			delete[] is;
+			delete[] ts;
+		}
+
+		//A function to clear all branched from the formedTree stack.
+		void ClearTreeForm(dynarray<TreeBox*> &arr)
+		{
+			while (arr.size() > 0)
+				arr.pop_back();
+		}
+
+		//A function to load the original axiom of the current L-System back into
+		//the formula variable.
+		void LoadOriginalAxiom()
+		{
+			for (unsigned int i = 0; i < originalAxiom.size(); i++)
+				formula.push_back(originalAxiom[i]);
+		}
+
+		//A function to clear the newFormula and formula usually in preparation to
+		//form a new L-System.
+		void ClearFormula()
+		{
+			formula.clear();
+			newFormula.clear();
 		}
 	};
 }

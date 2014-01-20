@@ -83,6 +83,18 @@ namespace octet
       tg = new tree_generator();
       tg->AddTree(tree_generator::alive, model);
 
+	  glm::mat4 newModel;
+	  newModel = model;
+	  newModel[3].x += 5;
+
+	  tg->AddTree(tree_generator::dead, newModel);
+
+	  newModel[3].x += 5;
+
+	  tg->AddTree(tree_generator::dead, newModel);
+
+	  tg->PrepareTrees();
+
       //player position & gravity
       position = glm::vec3(0, 60, -40);
       gravity = false;
