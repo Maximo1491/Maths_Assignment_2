@@ -21,7 +21,7 @@ namespace octet
 
 		//Declare all variables here
 		int iterations, maxIterations, ignoreSize, numberOfBranches, branchSubSections, totalHeight;
-		float height, width, depth, branchRadius, angle, leafWidth;
+		float height, width, depth, branchRadius, angle, leafWidth, scale;
 		string originalAxiom, ignore;
 		bool isKeyPressed, cameraReset;
 
@@ -59,6 +59,9 @@ namespace octet
 			leafWidth = 10 * width;
 			branchRadius = 0.05f;
 			branchSubSections = 8;
+
+			//Set the tree's scale percentage.
+			scale = 0.125f;
 
 			//Initialize the size variables.
 			verticesSize = 0;
@@ -526,6 +529,7 @@ namespace octet
 			treeBox->branchAngleX = 0.0f;
 			treeBox->branchAngleZ = 0.0f;
 
+			/*
 			treeBox->modelToWorld[0][0] = origin[0].x;
 			treeBox->modelToWorld[0][1] = origin[0].y;
 			treeBox->modelToWorld[0][2] = origin[0].z;
@@ -544,7 +548,9 @@ namespace octet
 			treeBox->modelToWorld[3][3] = origin[3].w;
 
 			treeBox->modelToWorld.transpose4x4();
+			*/
 
+			treeBox->modelToWorld.loadIdentity();
 			treeBox->branchStartPoint = treeBox->modelToWorld.row(3);
 
 			mat4t modelToWorld = treeBox->modelToWorld;
@@ -793,14 +799,15 @@ namespace octet
 						vec4 vert = vec4(currentRadius * cos(currentAngle * 0.0174532925f), ((float)i * (height * 2.0f)) - (*iter)->branchHeight, currentRadius * sin(currentAngle * 0.0174532925f), 1.0f);
 
 						vert = vert * (*iter)->modelToWorld;
-
+						
 						mat4t testMat;
 						testMat.loadIdentity();
-						testMat[0][0] = 0.25f;
-						testMat[1][1] = 0.25f;
-						testMat[2][2] = 0.25f;
+						testMat[0][0] = scale;
+						testMat[1][1] = scale;
+						testMat[2][2] = scale;
 
 						vert = vert * testMat;
+						vert = vert * modelToWorld;
 
 						verts[0 + (j * 4) + (i * branchSubSections * 4) + (currentHeight * branchSubSections * 4)] = vert.x();
 						verts[1 + (j * 4) + (i * branchSubSections * 4) + (currentHeight * branchSubSections * 4)] = vert.y();
