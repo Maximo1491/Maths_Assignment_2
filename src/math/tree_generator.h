@@ -61,7 +61,7 @@ namespace octet
 			branchSubSections = 8;
 
 			//Set the tree's scale percentage.
-			scale = 0.125f;
+			scale = 0.2f;
 
 			//Initialize the size variables.
 			verticesSize = 0;
@@ -163,9 +163,10 @@ namespace octet
 		}
 
 		//A command to generate another tree.
-		void AddTree(int treeType, glm::mat4 origin)
+		void AddTree(int treeType, glm::vec3 origin)
 		{
-			FormFormula(origin);
+			glm::mat4 pos = glm::translate(glm::mat4(1.0), origin);
+			FormFormula(pos);
 		}
 
 		//The ReadFile() function is used to read the outside

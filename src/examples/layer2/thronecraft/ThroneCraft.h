@@ -81,19 +81,6 @@ namespace octet
       tree_shader_.init();
 
       tg = new tree_generator();
-      tg->AddTree(tree_generator::alive, model);
-
-	  glm::mat4 newModel;
-	  newModel = model;
-	  newModel[3].x += 5;
-
-	  tg->AddTree(tree_generator::dead, newModel);
-
-	  newModel[3].x += 5;
-
-	  tg->AddTree(tree_generator::dead, newModel);
-
-	  tg->PrepareTrees();
 
       //player position & gravity
       position = glm::vec3(0, 60, -40);
@@ -147,7 +134,7 @@ namespace octet
 
       c = new superChunk();
 
-      generateTerrain(0, 0, 256, 256, 75, 0.25);
+      generateTerrain(0, 0, 256, 256, 90, 0.25);
 
       //Start by selecting a grass block
       selectedBlock = grass;
@@ -184,8 +171,18 @@ namespace octet
             else
 							c->set(x, i, z, stone);
           }
+
+					int r = rand() % 8000;
+
+					if ( r == 1 && y <= 100)
+					{
+						std::cout << "Adding Tree";
+						tg->AddTree(tree_generator::alive, glm::vec3(x + 0.5f, y, z + 0.5f));
+					}
         }
       }
+
+			tg->PrepareTrees();
     }
 
     //mouse movement
