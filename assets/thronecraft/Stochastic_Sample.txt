@@ -1,11 +1,11 @@
 Axiom
 F
 Rule
-20% F=FF
+30% F=FF
 Rule
-40% F=F[+F][-F]F
+35% F=F[+F][-F]F
 Rule
-40% F=F[-F][+F]F
+35% F=F[-F][+F]F
 Angle
 60
 Iterations

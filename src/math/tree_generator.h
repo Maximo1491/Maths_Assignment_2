@@ -253,7 +253,7 @@ namespace octet
 					else if (strcmp(buffer, "Iterations") == 0)
 					{
 						buffer = strtok(NULL, "\n");
-						iterations = atoi(buffer) + ((rand() % 3) - 1);
+						iterations = atoi(buffer);
 						buffer = strtok(NULL, "\n");
 					}
 
@@ -292,6 +292,8 @@ namespace octet
 		//set to.
 		void FormFormula(glm::mat4 origin)
 		{
+			iterations = iterations + ((rand() % 3) - 1);
+
 			//Go through each iteration to form the formula.
 			for (int i = 0; i < iterations; i++)
 			{
