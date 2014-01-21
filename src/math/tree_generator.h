@@ -20,32 +20,27 @@ namespace octet
 		};
 
 		//Declare all variables here
-		int iterations, maxIterations, ignoreSize, numberOfBranches, branchSubSections, totalHeight;
+		int iterations, maxIterations, ignoreSize, numberOfBranches, branchSubSections;
 		float height, width, depth, branchRadius, angle, leafWidth, scale;
 		string originalAxiom, ignore;
-		bool isKeyPressed, cameraReset;
 
 		dynarray<std::string> rules;
 		dynarray<TreeBox*> formedTree;
 		dynarray<GLfloat> vertices;
-		dynarray<GLushort> indices, texCoords;
+		dynarray<GLushort> texCoords;
 		std::vector<char> formula, newFormula;
 
-		GLuint vbo, lbo, ibo, cbo, tbo, program, *textures;
+		GLuint vbo, tbo, program, *textures;
 		GLint attribute_position, attribute_v_color, attribute_tex, uniform_matrix;
-
-		//std::vector<GLfloat> vertices, colors;
-		//std::vector<GLushort> indices, texCoords;
-		int verticesSize, leafSize, indicesSize, colorsSize, texCoordsSize;
 
 	public:
 
 		//Enumeration to tell what kind of tree to make.
 		enum
 		{
-			alive,
-			dying,
 			dead,
+			dying,
+			alive,
 		};
 		
 		tree_generator() 
@@ -61,25 +56,11 @@ namespace octet
 			branchSubSections = 8;
 
 			//Set the tree's scale percentage.
-			scale = 0.2f;
-
-			//Initialize the size variables.
-			verticesSize = 0;
-			indicesSize = 0;
-			leafSize = 0;
-			colorsSize = 0;
-			texCoordsSize = 0;
-			totalHeight = 0;
+			scale = 0.125f;
 
 			//Load the necessary buffers to be used.
-			//vbo shall be used for vertices.
-			//ibo shall be used for indices.
-			//cbo shall be used to store colors.
 			glGenBuffers(1, &vbo);
-			glGenBuffers(1, &ibo);
-			glGenBuffers(1, &cbo);
 			glGenBuffers(1, &tbo);
-			glGenBuffers(1, &lbo);
 
 			textures = new GLuint[2];
 
@@ -118,55 +99,38 @@ namespace octet
 		~tree_generator()
 		{
 			glDeleteBuffers(1, &vbo);
-			glDeleteBuffers(1, &ibo);
-			glDeleteBuffers(1, &cbo);
 			glDeleteBuffers(1, &tbo);
-			glDeleteBuffers(1, &lbo);
 		}
 
 		void render(glm::mat4 projection, tree_shader &tree_shader_)
 		{
 			tree_shader_.render(projection);
 
-			//glEnable(GL_CULL_FACE);
+			glEnable(GL_CULL_FACE);
 			glEnable(GL_DEPTH_TEST);
 
 			glEnableVertexAttribArray(attribute_pos);
 			glEnableVertexAttribArray(attribute_uv);
-			//glEnableVertexAttribArray(attribute_color);
 
 			glBindTexture(GL_TEXTURE_2D, textures[0]);
-
-			glBindBuffer(GL_ARRAY_BUFFER, vbo);
-			glVertexAttribPointer(attribute_pos, 4, GL_FLOAT, GL_FALSE, sizeof(GLfloat) * 4, 0);
-
-			//glBindBuffer(GL_ARRAY_BUFFER, cbo);
-			//glVertexAttribPointer(attribute_color, 4, GL_FLOAT, GL_FALSE, sizeof(GLfloat) * 4, 0);
 
 			glBindBuffer(GL_ARRAY_BUFFER, tbo);
 			glVertexAttribPointer(attribute_uv, 2, GL_UNSIGNED_SHORT, GL_FALSE, sizeof(GLushort) * 2, 0);
 
-			//Bind the ibo to the element array buffer.
-			glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, ibo);
+			glBindBuffer(GL_ARRAY_BUFFER, vbo);
+			glVertexAttribPointer(attribute_pos, 4, GL_FLOAT, GL_FALSE, sizeof(GLfloat) * 4, 0);
 
-			//Get the size of the ibo buffer.  This will be
-			//how many bytes the ibo buffer currently is.
-			int size;
-			glGetBufferParameteriv(GL_ELEMENT_ARRAY_BUFFER, GL_BUFFER_SIZE, &size);
-
-			//Draw the indices into the window.
-			glDrawElements(GL_TRIANGLES, size/sizeof(GLushort), GL_UNSIGNED_SHORT, 0);
+			glDrawArrays(GL_TRIANGLES, 0, vertices.size());
 
 			glDisableVertexAttribArray(attribute_pos);
 			glDisableVertexAttribArray(attribute_uv);
-			//glDisableVertexAttribArray(attribute_color);
 		}
 
 		//A command to generate another tree.
 		void AddTree(int treeType, glm::vec3 origin)
 		{
 			glm::mat4 pos = glm::translate(glm::mat4(1.0), origin);
-			FormFormula(pos);
+			FormFormula(treeType, pos);
 		}
 
 		//The ReadFile() function is used to read the outside
@@ -291,7 +255,7 @@ namespace octet
 		//This function will form the forumla based on the rules
 		//and number of iterations that the L-System is currently
 		//set to.
-		void FormFormula(glm::mat4 origin)
+		void FormFormula(int treeType, glm::mat4 origin)
 		{
 			iterations = iterations + ((rand() % 3) - 1);
 
@@ -514,11 +478,11 @@ namespace octet
 			}
 
 			//Execute MakeTree() to form the 3D objects for rendering.
-			MakeTree(origin);
+			MakeTree(treeType, origin);
 		}
 
 		//This funnction will compute the vertices and indices of the tree for drawing.
-		void MakeTree(glm::mat4 origin)
+		void MakeTree(int treeType, glm::mat4 origin)
 		{
 			TreeBox* treeBox;
 			std::vector<mat4t> positionStack;
@@ -531,27 +495,6 @@ namespace octet
 			treeBox->parentHeightAtBase = 0;
 			treeBox->branchAngleX = 0.0f;
 			treeBox->branchAngleZ = 0.0f;
-
-			/*
-			treeBox->modelToWorld[0][0] = origin[0].x;
-			treeBox->modelToWorld[0][1] = origin[0].y;
-			treeBox->modelToWorld[0][2] = origin[0].z;
-			treeBox->modelToWorld[0][3] = origin[0].w;
-			treeBox->modelToWorld[1][0] = origin[1].x;
-			treeBox->modelToWorld[1][1] = origin[1].y;
-			treeBox->modelToWorld[1][2] = origin[1].z;
-			treeBox->modelToWorld[1][3] = origin[1].w;
-			treeBox->modelToWorld[2][0] = origin[2].x;
-			treeBox->modelToWorld[2][1] = origin[2].y;
-			treeBox->modelToWorld[2][2] = origin[2].z;
-			treeBox->modelToWorld[2][3] = origin[2].w;
-			treeBox->modelToWorld[3][0] = origin[3].x;
-			treeBox->modelToWorld[3][1] = origin[3].y;
-			treeBox->modelToWorld[3][2] = origin[3].z;
-			treeBox->modelToWorld[3][3] = origin[3].w;
-
-			treeBox->modelToWorld.transpose4x4();
-			*/
 
 			treeBox->modelToWorld.loadIdentity();
 			treeBox->branchStartPoint = treeBox->modelToWorld.row(3);
@@ -571,14 +514,10 @@ namespace octet
 				if (formula[i] == 'F')
 				{
 					vec4 branchVector = modelToWorld.row(3) - treeBox->branchStartPoint;
-					//float branchMagnitude = sqrt(pow(branchVector[0], 2) + pow(branchVector[1], 2) + pow(branchVector[3], 2));
 
-					//if (treeBox->branchHeight <= floor((branchMagnitude / 2.0) + 0.5))
-					//{
-						treeBox->branchHeight++;
-						treeBox->modelToWorld.translate(0, height, 0);
-						totalTreeHeight++;
-					//}
+					treeBox->branchHeight++;
+					treeBox->modelToWorld.translate(0, height, 0);
+					totalTreeHeight++;
 
 					modelToWorld.translate(0, height * 2.0f, 0);
 				}
@@ -744,30 +683,18 @@ namespace octet
 			//Keep track of the number of branches that we have calculated.
 			numberOfBranches = 0;
 
-			//Initialize arrays to hold vertices, indices, and colors.
-			GLfloat *verts = new GLfloat[totalTreeHeight * branchSubSections * 4];
-			//GLfloat *leafVertices = new GLfloat[formedTree.size() * 12 * 4];
-			GLushort *inds = new GLushort[totalTreeHeight * branchSubSections * 6];
-			//GLfloat *cols = new GLfloat[totalTreeHeight * branchSubSections * 4];
-			GLushort *texCs = new GLushort[totalTreeHeight * branchSubSections * 2];
-
 			//Keep track of the number of elements in each array.
-			int vertsSize = totalTreeHeight * branchSubSections * 4;
-			//int leafSize = formedTree.size() * 48 * 4;
-			int indsSize = totalTreeHeight * branchSubSections * 6;
-			//int colsSize = totalTreeHeight * branchSubSections * 4;
-			int texCsSize = totalTreeHeight * branchSubSections * 2;
+			int vertsSize = totalTreeHeight * branchSubSections * 24;
+			int texCsSize = totalTreeHeight * branchSubSections * 12;
 
 			float angleOffset = 360.0f / branchSubSections;
-			int currentHeight = 0;
 
 			//Cycle through all the branches in the formedTree stack.
 			for (dynarray<TreeBox*>::iterator iter = formedTree.begin(); iter != formedTree.end(); iter++)
 			{
 				float radiusOffset;
 				float currentRadius;
-
-				GLushort texCoordY = 1;
+				float nextRadius;
 
 				currentRadius = branchRadius * (*iter)->branchHeight;
 				
@@ -777,160 +704,131 @@ namespace octet
 				radiusOffset = currentRadius / (*iter)->branchHeight;
 				(*iter)->radiusOffset = radiusOffset;
 
+				currentRadius += radiusOffset;
+				nextRadius = currentRadius;
+
 				for (int i = 0; i < (*iter)->branchHeight; i++)
 				{
 					float currentAngle = 0.0f;
 					currentRadius -= radiusOffset;
+					nextRadius = currentRadius - radiusOffset;
 
 					if ((*iter)->parentBranchIndex < 0 && i <= 0)
 						currentRadius = currentRadius + (radiusOffset * 10);
 
-					GLushort texCoordX = 1;
-
-					if (texCoordY > 0)
-						texCoordY = 0;
-					else
-						texCoordY = 1;
-
 					for (int j = 0; j < branchSubSections; j++)
 					{
-						if (texCoordX > 0)
-							texCoordX = 0;
-						else
-							texCoordX = 1;
-
-						vec4 vert = vec4(currentRadius * cos(currentAngle * 0.0174532925f), ((float)i * (height * 2.0f)) - (*iter)->branchHeight, currentRadius * sin(currentAngle * 0.0174532925f), 1.0f);
-
-						vert = vert * (*iter)->modelToWorld;
+						mat4t scaleMat;
+						scaleMat.loadIdentity();
+						scaleMat[0][0] = scale;
+						scaleMat[1][1] = scale;
+						scaleMat[2][2] = scale;
 						
-						mat4t testMat;
-						testMat.loadIdentity();
-						testMat[0][0] = scale;
-						testMat[1][1] = scale;
-						testMat[2][2] = scale;
+						vec4 vert1 = vec4(currentRadius * cos(currentAngle * 0.0174532925f), ((float)i * (height * 2.0f)) - (*iter)->branchHeight, currentRadius * sin(currentAngle * 0.0174532925f), 1.0f) * (*iter)->modelToWorld * scaleMat * modelToWorld;
+						vec4 vert2 = vec4(nextRadius * cos(currentAngle * 0.0174532925f), ((float)(i + 1) * (height * 2.0f)) - (*iter)->branchHeight, nextRadius * sin(currentAngle * 0.0174532925f), 1.0f) * (*iter)->modelToWorld * scaleMat * modelToWorld;
+						vec4 vert3 = vec4(currentRadius * cos((currentAngle + angleOffset) * 0.0174532925f), ((float)i * (height * 2.0f)) - (*iter)->branchHeight, currentRadius * sin((currentAngle + angleOffset) * 0.0174532925f), 1.0f) * (*iter)->modelToWorld * scaleMat * modelToWorld;
+						vec4 vert4 = vec4(currentRadius * cos((currentAngle + angleOffset) * 0.0174532925f), ((float)i * (height * 2.0f)) - (*iter)->branchHeight, currentRadius * sin((currentAngle + angleOffset) * 0.0174532925f), 1.0f) * (*iter)->modelToWorld * scaleMat * modelToWorld;
+						vec4 vert5 = vec4(nextRadius * cos(currentAngle * 0.0174532925f), ((float)(i + 1) * (height * 2.0f)) - (*iter)->branchHeight, nextRadius * sin(currentAngle * 0.0174532925f), 1.0f) * (*iter)->modelToWorld * scaleMat * modelToWorld;
+						vec4 vert6 = vec4(nextRadius * cos((currentAngle + angleOffset) * 0.0174532925f), ((float)(i + 1) * (height * 2.0f)) - (*iter)->branchHeight, nextRadius * sin((currentAngle + angleOffset) * 0.0174532925f), 1.0f) * (*iter)->modelToWorld * scaleMat * modelToWorld;
 
-						vert = vert * testMat;
-						vert = vert * modelToWorld;
+						vertices.push_back(vert1.x());
+						vertices.push_back(vert1.y());
+						vertices.push_back(vert1.z());
+						vertices.push_back(vert1.w());
 
-						verts[0 + (j * 4) + (i * branchSubSections * 4) + (currentHeight * branchSubSections * 4)] = vert.x();
-						verts[1 + (j * 4) + (i * branchSubSections * 4) + (currentHeight * branchSubSections * 4)] = vert.y();
-						verts[2 + (j * 4) + (i * branchSubSections * 4) + (currentHeight * branchSubSections * 4)] = vert.z();
-						verts[3 + (j * 4) + (i * branchSubSections * 4) + (currentHeight * branchSubSections * 4)] = vert.w();
+						texCoords.push_back(0);
+						texCoords.push_back(0);
 
-						//colors[0 + (j * 4) + (i * branchSubSections * 4) + (currentHeight * branchSubSections * 4)] = 1.0f;
-						//colors[1 + (j * 4) + (i * branchSubSections * 4) + (currentHeight * branchSubSections * 4)] = 0.0f;
-						//colors[2 + (j * 4) + (i * branchSubSections * 4) + (currentHeight * branchSubSections * 4)] = 0.0f;
-						//colors[3 + (j * 4) + (i * branchSubSections * 4) + (currentHeight * branchSubSections * 4)] = 1.0f;
+						vertices.push_back(vert2.x());
+						vertices.push_back(vert2.y());
+						vertices.push_back(vert2.z());
+						vertices.push_back(vert2.w());
 
-						texCs[0 + (j * 2) + (i * branchSubSections * 2) + (currentHeight * branchSubSections * 2)] = texCoordX;
-						texCs[1 + (j * 2) + (i * branchSubSections * 2) + (currentHeight * branchSubSections * 2)] = texCoordY;
+						texCoords.push_back(0);
+						texCoords.push_back(1);
+
+						vertices.push_back(vert3.x());
+						vertices.push_back(vert3.y());
+						vertices.push_back(vert3.z());
+						vertices.push_back(vert3.w());
+
+						texCoords.push_back(1);
+						texCoords.push_back(1);
+
+						vertices.push_back(vert4.x());
+						vertices.push_back(vert4.y());
+						vertices.push_back(vert4.z());
+						vertices.push_back(vert4.w());
+
+						texCoords.push_back(0);
+						texCoords.push_back(1);
+
+						vertices.push_back(vert5.x());
+						vertices.push_back(vert5.y());
+						vertices.push_back(vert5.z());
+						vertices.push_back(vert5.w());
+
+						texCoords.push_back(1);
+						texCoords.push_back(1);
+
+						vertices.push_back(vert6.x());
+						vertices.push_back(vert6.y());
+						vertices.push_back(vert6.z());
+						vertices.push_back(vert6.w());
+
+						texCoords.push_back(1);
+						texCoords.push_back(0);
 
 						currentAngle += angleOffset;
-						
-						if (i < (*iter)->branchHeight - 1)
-						{
-							if (j < branchSubSections - 1)
-							{
-								inds[0 + (j * 6) + (i * branchSubSections * 6) + (currentHeight * branchSubSections * 6)] = 
-									(j + (i * branchSubSections) + (currentHeight * branchSubSections) + (totalHeight * branchSubSections));
-								inds[1 + (j * 6) + (i  * branchSubSections * 6) + (currentHeight * branchSubSections * 6)] = 
-									(j + branchSubSections + (i * branchSubSections) + (currentHeight * branchSubSections) + (totalHeight * branchSubSections));
-								inds[2 + (j * 6) + (i  * branchSubSections * 6) + (currentHeight * branchSubSections * 6)] = 
-									(1 + j + (i  * branchSubSections) + (currentHeight * branchSubSections) + (totalHeight * branchSubSections));
-								inds[3 + (j * 6) + (i * branchSubSections * 6) + (currentHeight * branchSubSections * 6)] = 
-									(j + (branchSubSections + 1) + (i * branchSubSections) + (currentHeight * branchSubSections) + (totalHeight * branchSubSections));
-								inds[4 + (j * 6) + (i * branchSubSections * 6) + (currentHeight * branchSubSections * 6)] = 
-									(1 + j + (i * branchSubSections) + (currentHeight * branchSubSections) + (totalHeight * branchSubSections));
-								inds[5 + (j * 6) + (i * branchSubSections * 6) + (currentHeight * branchSubSections * 6)] = 
-									(j + branchSubSections + (i * branchSubSections) + (currentHeight * branchSubSections) + (totalHeight * branchSubSections));
-							}
-
-							else if (j == branchSubSections - 1)
-							{
-								inds[0 + (j * 6) + (i * branchSubSections * 6) + (currentHeight * branchSubSections * 6)] = 
-									(j + (i * branchSubSections) + (currentHeight * branchSubSections) + (totalHeight * branchSubSections));
-								inds[1 + (j * 6) + (i  * branchSubSections * 6) + (currentHeight * branchSubSections * 6)] = 
-									(j + branchSubSections + (i * branchSubSections) + (currentHeight * branchSubSections) + (totalHeight * branchSubSections));
-								inds[2 + (j * 6) + (i  * branchSubSections * 6) + (currentHeight * branchSubSections * 6)] = 
-									(1 + j - branchSubSections + (i  * branchSubSections) + (currentHeight * branchSubSections) + (totalHeight * branchSubSections));
-								inds[3 + (j * 6) + (i * branchSubSections * 6) + (currentHeight * branchSubSections * 6)] = 
-									(j + 1 + (i * branchSubSections) + (currentHeight * branchSubSections) + (totalHeight * branchSubSections));
-								inds[4 + (j * 6) + (i * branchSubSections * 6) + (currentHeight * branchSubSections * 6)] = 
-									(1 + j - branchSubSections + (i  * branchSubSections) + (currentHeight * branchSubSections) + (totalHeight * branchSubSections));
-								inds[5 + (j * 6) + (i * branchSubSections * 6) + (currentHeight * branchSubSections * 6)] = 
-									(j + branchSubSections + (i * branchSubSections) + (currentHeight * branchSubSections) + (totalHeight * branchSubSections));
-							}
-						}
 					}
 
 					if ((*iter)->parentBranchIndex < 0 && i <= 0)
 						currentRadius = currentRadius - (radiusOffset * 10);
 				}
-
-				//Count the height that we have traversed thus far.
-				currentHeight += (int)(*iter)->branchHeight;
 			}
-
-			totalHeight += currentHeight;
-			verticesSize += vertsSize;
-
-			for (int i = 0; i < vertsSize; i++)
-				vertices.push_back(verts[i]);
-
-			//colorsSize += colsSize;
-
-			//for (int i = 0; i < colsSize; i++)
-				//colors.push_back(cols[i]);
-
-			indicesSize += indsSize;
-
-			for (int i = 0; i < indsSize; i++)
-				indices.push_back(inds[i]);
-
-			texCoordsSize += texCsSize;
-
-			for (int i = 0; i < texCsSize; i++)
-				texCoords.push_back(texCs[i]);
 			
-			//Release the arrays created as they are loaded into the buffers.
-			//This prevents memory leaks.
-			delete[] verts;
-			//delete[] leafVertices;
-			//delete[] colors;
-			delete[] inds;
-			delete[] texCs;
+			if (treeType > 0)
+				MakeLeaves(formedTree, vertsSize);
 
 			ClearTreeForm(formedTree);
 			ClearFormula();
 			LoadOriginalAxiom();
 		}
 
+		void MakeLeaves(dynarray<TreeBox*> &target, int size)
+		{
+			for (dynarray<TreeBox*>::iterator iter = target.begin(); iter != target.end(); iter++)
+			{
+				mat4t tempMat = (*iter)->modelToWorld;
+				float height = (*iter)->branchHeight;
+
+				tempMat.translate(0.0f, height / 2.0f, 0.0f);
+
+				for (int i = 0; i < 6; i++)
+				{
+
+				}
+			}
+		}
+
 		void PrepareTrees()
 		{
-			GLfloat* vs = new GLfloat[verticesSize];
-			GLushort* is = new GLushort[indicesSize];
-			GLushort* ts = new GLushort[texCoordsSize];
+			GLfloat* vs = new GLfloat[vertices.size()];
+			GLushort* ts = new GLushort[texCoords.size()];
 
-			for (int i = 0; i < verticesSize; i++)
+			for (int i = 0; i < vertices.size(); i++)
 				vs[i] = vertices[i];
 
-			for (int i = 0; i < indicesSize; i++)
-				is[i] = indices[i];
-
-			for (int i = 0; i < texCoordsSize; i++)
+			for (int i = 0; i < texCoords.size(); i++)
 				ts[i] = texCoords[i];
 
 			glBindBuffer(GL_ARRAY_BUFFER, vbo);
-			glBufferData(GL_ARRAY_BUFFER, verticesSize * sizeof(GLfloat), vs, GL_STATIC_DRAW);
-
-			glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, ibo);
-			glBufferData(GL_ELEMENT_ARRAY_BUFFER, indicesSize * sizeof(GLushort), is, GL_STATIC_DRAW);
+			glBufferData(GL_ARRAY_BUFFER, vertices.size() * sizeof(GLfloat), vs, GL_STATIC_DRAW);
 
 			glBindBuffer(GL_ARRAY_BUFFER, tbo);
-			glBufferData(GL_ARRAY_BUFFER, texCoordsSize * sizeof(GLushort), ts, GL_STATIC_DRAW);
+			glBufferData(GL_ARRAY_BUFFER, texCoords.size() * sizeof(GLushort), ts, GL_STATIC_DRAW);
 
 			delete[] vs;
-			delete[] is;
 			delete[] ts;
 		}
 
