@@ -21,8 +21,9 @@ namespace octet
     int numOfLights;
     glm::vec4 light_information[8];
     glm::vec4 light_ambient;
-    glm::vec4 light_diffuse;
+    glm::vec4 light_diffuse[8];
     float light_angle;
+	clock_t skyTimer;
 
     tree_generator* tg;
 
@@ -80,6 +81,8 @@ namespace octet
       ui_shader_.init();
       tree_shader_.init();
 
+	  skyTimer = clock();
+
       tg = new tree_generator();
 
       //player position & gravity
@@ -117,16 +120,21 @@ namespace octet
       ui[crosshair_bottom].init((windowWidth*0.5f) - 2, (windowHeight*0.5f) + 1, 4, 5, windowWidth, windowHeight);
 
       //Number of Lights
-      numOfLights = 1;
+      numOfLights = 2;
 
       //Ambient Light
       light_ambient = glm::vec4( 0.2f, 0.2f, 0.2f, 1.0f );
 
       //Diffuse Light
-      light_diffuse = glm::vec4( 1.0f, 1.0f, 1.0f, 1.0f );
+      //light_diffuse = glm::vec4( 1.0f, 1.0f, 1.0f, 1.0f );
 
       //Light 1
       light_information[0] = glm::vec4( 1.0f, 2.0f, 3.0f, 0.0f );
+	  light_diffuse[0] = glm::vec4( 1.0f, 1.0f, 1.0f, 1.0f );
+
+	  //Light 2
+      light_information[1] = glm::vec4( -1.0f, 2.0f, -3.0f, 0.0f );
+	  light_diffuse[1] = glm::vec4( 0.75f, 0.75f, 0.75f, 1.0f );
 
       light_angle = 0.0f;
 
@@ -501,10 +509,15 @@ namespace octet
       }
 
       light_information[0] = glm::vec4(sin(light_angle * 0.0174532925f), cos(light_angle * 0.0174532925f), 0.0f, 0.0f);
-      tg->render(projection * view * model, tree_shader_);
-      //Draws our super chunk
-      c->render(model, view, projection, numOfLights, light_information, light_diffuse, light_ambient, color_shader_);
+		skyTimer = clock() - skyTimer;
+		light_angle += (skyTimer / CLOCKS_PER_SEC) / 600.0f;
 
+		if (light_angle > 360.0f)
+			light_angle -= 360.0f;
+      
+      //Draws our super chunk
+      c->render(model, view, projection, numOfLights, light_information, light_ambient, light_diffuse, color_shader_);
+	  tg->render(projection * view * model, tree_shader_, numOfLights, light_information, light_ambient, light_diffuse);
 
       for(int i = ui_grass_block; i <= ui_brick_block; i++)
         ui[i].render(ui_shader_, blockColors[i]);

@@ -7,13 +7,13 @@ namespace octet {
     void init() 
 		{
 			const char vertex_shader[] = SHADER_STR(
-			const int maxLights = 4;
+			const int maxLights = 8;
 			attribute vec4 pos;
 			attribute vec3 normal;
 
 			uniform mat4 modelToProjection;
 			uniform vec4 ambient;
-			uniform vec4 diffuse;
+			uniform vec4 diffuse[maxLights];
 			uniform vec4 light[maxLights];
 			uniform int numOfLights;
 		
@@ -84,7 +84,7 @@ namespace octet {
 					vec3 L = normalize(light[i]).xyz;
 
 					float diffusePercentage = max(dot(L, v_normal), 0.0);
-					diffuseFactor += diffusePercentage * diffuse;
+					diffuseFactor += diffusePercentage * diffuse[i];
 				}
 
 				vec4 diffuseColor = diffuseFactor * color;
@@ -111,13 +111,13 @@ namespace octet {
 	  uniform_numOfLights = glGetUniformLocation(program(), "numOfLights");
     }
 
-    void render(glm::mat4 &modelToProjection, int numOfLights, const glm::vec4 *light_information, glm::vec4 ambient, glm::vec4 diffuse) 
+    void render(glm::mat4 &modelToProjection, int numOfLights, const glm::vec4 *light_information, glm::vec4 ambient, glm::vec4 *diffuse) 
 	{
       shader::render();
 
       glUniformMatrix4fv( modelToProjectionIndex_, 1, GL_FALSE, &modelToProjection[0][0] );
 	  glUniform4f( uniform_ambient, ambient.x, ambient.y, ambient.z, ambient.w );
-	  glUniform4f( uniform_diffuse, diffuse.x, diffuse.y, diffuse.z, diffuse.w );
+	  glUniform4fv( uniform_diffuse, numOfLights, (float*)diffuse );
 	  glUniform4fv( uniform_light, numOfLights, (float*)light_information );
 	  glUniform1i( uniform_numOfLights, numOfLights );
     }

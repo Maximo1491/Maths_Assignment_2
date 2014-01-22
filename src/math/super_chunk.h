@@ -81,7 +81,7 @@ namespace octet
 				c[cx][cy][cz + 1]->setChanged(true);
 		}
 
-		void render(glm::mat4 model, glm::mat4 view, glm::mat4 projection, int numOfLights, glm::vec4 *light_information, glm::vec4 light_ambient, glm::vec4 light_diffuse, color_shader color_shader_)
+		void render(glm::mat4 model, glm::mat4 view, glm::mat4 projection, int numOfLights, glm::vec4 *light_information, glm::vec4 light_ambient, glm::vec4 *light_diffuse, color_shader color_shader_)
 		{
       //Create a temporary modelToWorld to store the keep track of the start point
       glm::mat4 temp = model;
