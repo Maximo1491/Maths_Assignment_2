@@ -172,12 +172,12 @@ namespace octet
 							c->set(x, i, z, stone);
           }
 
-					int r = rand() % 2000;
+					int r = rand() % 8000;
 
 					if ( r == 1 && y <= 100)
 					{
-						std::cout << "Adding Tree";
-						tg->AddTree(tree_generator::alive, glm::vec3(x + 0.5f, y, z + 0.5f));
+						//std::cout << "Adding Tree";
+						tg->AddTree(tree_generator::alive, glm::vec3(x + 0.5f, y + 1.0f, z + 0.5f));
 					}
         }
       }

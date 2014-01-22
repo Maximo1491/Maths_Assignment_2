@@ -1,45 +1,49 @@
 namespace octet {
   class tree_shader : public shader 
 	{
-    GLuint modelToProjectionIndex_;
+    GLuint modelToProjectionIndex_, uniform_texture0, uniform_texture1;
 
   public:
     void init() 
 		{
 		const char vertex_shader[] = SHADER_STR(
-			attribute vec3 pos;\n
+			attribute vec4 pos;\n
 			attribute vec2 uv;\n
-			attribute vec4 color;\n
 			\n
 			uniform mat4 matrix;\n
 			\n
 			varying vec2 f_texCoord;\n
-			varying vec4 f_color;\n
+			varying float texType;\n
 			\n
 			void main()\n
 			{\n
-				gl_Position = matrix * vec4(pos, 1.0);\n
+				gl_Position = matrix * vec4(pos.xyz, 1.0);\n
 				f_texCoord = uv;\n
-				f_color = color;\n
+				texType = pos.w;\n
 			}\n
 		);
 
 		const char fragment_shader[] = SHADER_STR(
 			varying vec2 f_texCoord;\n
-			varying vec4 f_color;\n
+			varying float texType;\n
 			\n
-			uniform sampler2D tex;\n
+			uniform sampler2D bark;\n
+			uniform sampler2D leaf;\n
 			\n
 			void main()\n
 			{\n
-				//gl_FragColor = vec4(f_color.xyz, 1.0);\n
-				gl_FragColor = texture(tex, f_texCoord);\n
+				if (texType < 1.5)\n
+					gl_FragColor = texture2D(bark, f_texCoord);\n
+				else\n
+					gl_FragColor = texture2D(leaf, f_texCoord);\n
 			}\n
 		);
 
       shader::init(vertex_shader, fragment_shader);
 
       modelToProjectionIndex_ = glGetUniformLocation(program(), "matrix");
+	  uniform_texture0 = glGetUniformLocation(program(), "bark");
+	  uniform_texture1 = glGetUniformLocation(program(), "leaf");
     }
 
     void render(glm::mat4 &modelToProjection) 
@@ -67,6 +71,8 @@ namespace octet {
 		modelToWorld.transpose4x4();
 
 		glUniformMatrix4fv( modelToProjectionIndex_, 1, GL_FALSE, modelToWorld.get() );
+		glUniform1i( uniform_texture0, 0 );
+		glUniform1i( uniform_texture1, 1 );
     }
   };
 }

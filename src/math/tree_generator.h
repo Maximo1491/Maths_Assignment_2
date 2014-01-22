@@ -20,17 +20,21 @@ namespace octet
 		};
 
 		//Declare all variables here
-		int iterations, maxIterations, ignoreSize, numberOfBranches, branchSubSections;
+		int iterations, masterIterations, maxIterations, ignoreSize, numberOfBranches, branchSubSections;
 		float height, width, depth, branchRadius, angle, leafWidth, scale;
 		string originalAxiom, ignore;
+		bool done;
 
 		dynarray<std::string> rules;
 		dynarray<TreeBox*> formedTree;
 		dynarray<GLfloat> vertices;
-		dynarray<GLushort> texCoords;
+		dynarray<GLfloat> texCoords;
 		std::vector<char> formula, newFormula;
+		GLfloat* sphere;
+		GLushort* sphereTex;
+		int sphereSize, sphereTexSize;
 
-		GLuint vbo, tbo, program, *textures;
+		GLuint vbo, tbo, program;
 		GLint attribute_position, attribute_v_color, attribute_tex, uniform_matrix;
 
 	public:
@@ -54,18 +58,24 @@ namespace octet
 			leafWidth = 10 * width;
 			branchRadius = 0.05f;
 			branchSubSections = 8;
+			done = false;
 
 			//Set the tree's scale percentage.
 			scale = 0.125f;
+
+			//Form a unit length sphere to use for leaves
+			//FormSphere(2);
 
 			//Load the necessary buffers to be used.
 			glGenBuffers(1, &vbo);
 			glGenBuffers(1, &tbo);
 
-			textures = new GLuint[2];
+			GLuint textures[2];
 
 			//Generate a buffer for the bark texture
 			glGenTextures(2, textures);
+			glEnable(GL_TEXTURE_2D);
+			glActiveTexture(GL_TEXTURE0);
 			glBindTexture(GL_TEXTURE_2D, textures[0]);
 
 			int width, height;
@@ -79,6 +89,7 @@ namespace octet
 			glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_LINEAR);
 			glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_LINEAR);
 
+			glActiveTexture(GL_TEXTURE1);
 			glBindTexture(GL_TEXTURE_2D, textures[1]);
 
 			image = SOIL_load_image("../../assets/thronecraft/bigtreeleafd.png", &width, &height, 0, SOIL_LOAD_RGBA);
@@ -86,6 +97,8 @@ namespace octet
 
 			SOIL_free_image_data(image);
 
+			glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, GL_MIRRORED_REPEAT);
+			glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, GL_MIRRORED_REPEAT);
 			glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_LINEAR);
 			glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_LINEAR);
 
@@ -106,13 +119,13 @@ namespace octet
 		{
 			tree_shader_.render(projection);
 
-			glEnable(GL_CULL_FACE);
+			glDisable(GL_CULL_FACE);
 			glEnable(GL_DEPTH_TEST);
 
 			glEnableVertexAttribArray(attribute_pos);
 			glEnableVertexAttribArray(attribute_uv);
 
-			glBindTexture(GL_TEXTURE_2D, textures[0]);
+			//glBindTexture(GL_TEXTURE_2D, textures[0]);
 
 			glBindBuffer(GL_ARRAY_BUFFER, tbo);
 			glVertexAttribPointer(attribute_uv, 2, GL_UNSIGNED_SHORT, GL_FALSE, sizeof(GLushort) * 2, 0);
@@ -124,6 +137,332 @@ namespace octet
 
 			glDisableVertexAttribArray(attribute_pos);
 			glDisableVertexAttribArray(attribute_uv);
+		}
+
+		void FormSphere(int subdivisions)
+		{
+			sphereSize = 24 * 3 * (int)pow(4.0f, subdivisions);
+			sphereTexSize = 24 * 2 * (int)pow(4.0f, subdivisions);
+
+			GLfloat* vert_swap = new GLfloat[sphereSize];
+			sphere = new GLfloat[sphereSize];
+			GLushort* tex_swap = new GLushort[sphereTexSize];
+			sphereTex = new GLushort[sphereTexSize];
+
+			//Form an octahedron
+			sphere[0] = 0.0f;
+			sphere[1] = 0.0f;
+			sphere[2] = 1.0f;
+
+			sphereTex[0] = 1;
+			sphereTex[1] = 0;
+
+			sphere[3] = 0.0f;
+			sphere[4] = 1.0f;
+			sphere[5] = 0.0f;
+
+			sphereTex[2] = 0;
+			sphereTex[3] = 0;
+
+			sphere[6] = 1.0f;
+			sphere[7] = 0.0f;
+			sphere[8] = 0.0f;
+
+			sphereTex[4] = 0;
+			sphereTex[5] = 1;
+
+			sphere[9] = 0.0f;
+			sphere[10] = 1.0f;
+			sphere[11] = 0.0f;
+
+			sphereTex[6] = 0;
+			sphereTex[7] = 0;
+
+			sphere[12] = 0.0f;
+			sphere[13] = 0.0f;
+			sphere[14] = 1.0f;
+
+			sphereTex[8] = 1;
+			sphereTex[9] = 0;
+
+			sphere[15] = -1.0f;
+			sphere[16] = 0.0f;
+			sphere[17] = 0.0f;
+
+			sphereTex[10] = 0;
+			sphereTex[11] = 1;
+
+			sphere[18] = 0.0f;
+			sphere[19] = 1.0f;
+			sphere[20] = 0.0f;
+
+			sphereTex[12] = 0;
+			sphereTex[13] = 0;
+
+			sphere[21] = -1.0f;
+			sphere[22] = 0.0f;
+			sphere[23] = 0.0f;
+
+			sphereTex[14] = 0;
+			sphereTex[15] = 1;
+
+			sphere[24] = 0.0f;
+			sphere[25] = 0.0f;
+			sphere[26] = -1.0f;
+
+			sphereTex[16] = 1;
+			sphereTex[17] = 0;
+
+			sphere[27] = 0.0f;
+			sphere[28] = 1.0f;
+			sphere[29] = 0.0f;
+
+			sphereTex[18] = 0;
+			sphereTex[19] = 0;
+			
+			sphere[30] = 0.0f;
+			sphere[31] = 0.0f;
+			sphere[32] = -1.0f;
+			
+			sphereTex[20] = 1;
+			sphereTex[21] = 0;
+
+			sphere[33] = 1.0f;
+			sphere[34] = 0.0f;
+			sphere[35] = 0.0f;
+
+			sphereTex[22] = 0;
+			sphereTex[23] = 1;
+
+			sphere[36] = 1.0f;
+			sphere[37] = 0.0f;
+			sphere[38] = 0.0f;
+
+			sphereTex[24] = 0;
+			sphereTex[25] = 1;
+			
+			sphere[39] = 0.0f;
+			sphere[40] = 0.0f;
+			sphere[41] = -1.0f;
+			
+			sphereTex[26] = 1;
+			sphereTex[27] = 0;
+
+			sphere[42] = 0.0f;
+			sphere[43] = -1.0f;
+			sphere[44] = 0.0f;
+
+			sphereTex[28] = 1;
+			sphereTex[29] = 1;
+
+			sphere[45] = 0.0f;
+			sphere[46] = 0.0f;
+			sphere[47] = 1.0f;
+
+			sphereTex[30] = 1;
+			sphereTex[31] = 0;
+
+			sphere[48] = 1.0f;
+			sphere[49] = 0.0f;
+			sphere[50] = 0.0f;
+
+			sphereTex[32] = 0;
+			sphereTex[33] = 1;
+			
+			sphere[52] = -1.0f;			
+			sphere[51] = 0.0f;
+			sphere[53] = 0.0f;
+
+			sphereTex[34] = 0;
+			sphereTex[35] = 1;
+
+			sphere[54] = 0.0f;
+			sphere[55] = 0.0f;
+			sphere[56] = -1.0f;
+
+			sphereTex[36] = 1;
+			sphereTex[37] = 0;
+			
+			sphere[57] = -1.0f;
+			sphere[58] = 0.0f;
+			sphere[59] = 0.0f;
+
+			sphereTex[38] = 0;
+			sphereTex[39] = 1;
+			
+			sphere[60] = 0.0f;
+			sphere[61] = -1.0f;
+			sphere[62] = 0.0f;
+
+			sphereTex[40] = 1;
+			sphereTex[41] = 1;
+
+			sphere[63] = -1.0f;
+			sphere[64] = 0.0f;
+			sphere[65] = 0.0f;
+
+			sphereTex[42] = 0;
+			sphereTex[43] = 1;
+			
+			sphere[66] = 0.0f;
+			sphere[67] = 0.0f;
+			sphere[68] = 1.0f;
+
+			sphereTex[44] = 1;
+			sphereTex[45] = 0;
+			
+			sphere[69] = 0.0f;
+			sphere[70] = -1.0f;
+			sphere[71] = 0.0f;
+
+			sphereTex[46] = 1;
+			sphereTex[47] = 1;
+
+			//Subdivide the octrahedron as many times as specified by subdivisions.
+			for (int i = 0; i < subdivisions; i++)
+			{
+				int currentNumOfTriangles = 8 * (int)pow(4.0f, i);
+
+				for (int j = 0; j < currentNumOfTriangles; j++)
+				{
+					vec3 newVert1;
+					vec3 newVert2;
+					vec3 newVert3;
+
+					vec2 newTex1;
+					vec2 newTex2;
+					vec2 newTex3;
+
+					vec2 tex1 = vec2(sphereTex[0 + (j * 6)] - sphereTex[2 + (j * 6)] / 2, sphereTex[1 + (j * 6)] - sphereTex[3 + (j * 6)] / 2);
+					vec2 tex2 = vec2(sphereTex[0 + (j * 6)] - sphereTex[4 + (j * 6)] / 2, sphereTex[1 + (j * 6)] - sphereTex[6 + (j * 6)] / 2);
+
+					vec3 vert1 = vec3((sphere[0 + (j * 9)] + sphere[3 + (j * 9)]) / 2, (sphere[1 + (j * 9)] + sphere[4 + (j * 9)]) / 2, (sphere[2 + (j * 9)] + sphere[5 + (j * 9)]) / 2);
+					vec3 vert2 = vec3((sphere[0 + (j * 9)] + sphere[6 + (j * 9)]) / 2, (sphere[1 + (j * 9)] + sphere[7 + (j * 9)]) / 2, (sphere[2 + (j * 9)] + sphere[8 + (j * 9)]) / 2);
+
+					newVert1 = vert1;
+					newTex1 = tex1;
+
+					vert_swap[0 + (j * 36)] = sphere[0 + (j * 9)];
+					vert_swap[1 + (j * 36)] = sphere[1 + (j * 9)];
+					vert_swap[2 + (j * 36)] = sphere[2 + (j * 9)];
+
+					tex_swap[0 + (j * 24)] = sphereTex[0 + (j * 6)];
+					tex_swap[1 + (j * 24)] = sphereTex[1 + (j * 6)];
+
+					vert_swap[3 + (j * 36)] = vert1.x();
+					vert_swap[4 + (j * 36)] = vert1.y();
+					vert_swap[5 + (j * 36)] = vert1.z();
+
+					tex_swap[3 + (j * 24)] = tex1.x();
+					tex_swap[4 + (j * 24)] = tex1.y();
+
+					vert_swap[6 + (j * 36)] = vert2.x();
+					vert_swap[7 + (j * 36)] = vert2.y();
+					vert_swap[8 + (j * 36)] = vert2.z();
+
+					tex_swap[5 + (j * 24)] = tex2.x();
+					tex_swap[6 + (j * 24)] = tex2.y();
+
+					tex1 = vec2(sphereTex[2 + (j * 6)] - sphereTex[4 + (j * 6)] / 2, sphereTex[3 + (j * 6)] - sphereTex[5 + (j * 6)] / 2);
+					tex2 = vec2(sphereTex[2 + (j * 6)] - sphereTex[0 + (j * 6)] / 2, sphereTex[3 + (j * 6)] - sphereTex[1 + (j * 6)] / 2);
+
+					vert1 = vec3((sphere[3 + (j * 9)] + sphere[6 + (j * 9)]) / 2, (sphere[4 + (j * 9)] + sphere[7 + (j * 9)]) / 2, (sphere[5 + (j * 9)] + sphere[8 + (j * 9)]) / 2);
+					vert2 = vec3((sphere[3 + (j * 9)] + sphere[0 + (j * 9)]) / 2, (sphere[4 + (j * 9)] + sphere[1 + (j * 9)]) / 2, (sphere[5 + (j * 9)] + sphere[2 + (j * 9)]) / 2);
+
+					newVert2 = vert1;
+					newTex2 = tex1;
+
+					vert_swap[9 + (j * 36)] = sphere[3 + (j * 9)];
+					vert_swap[10 + (j * 36)] = sphere[4 + (j * 9)];
+					vert_swap[11 + (j * 36)] = sphere[5 + (j * 9)];
+
+					tex_swap[7 + (j * 24)] = sphereTex[2 + (j * 6)];
+					tex_swap[8 + (j * 24)] = sphereTex[3 + (j * 6)];
+
+					vert_swap[12 + (j * 36)] = vert1.x();
+					vert_swap[13 + (j * 36)] = vert1.y();
+					vert_swap[14 + (j * 36)] = vert1.z();
+
+					tex_swap[9 + (j * 24)] = tex1.x();
+					tex_swap[10 + (j * 24)] = tex1.y();
+
+					vert_swap[15 + (j * 36)] = vert2.x();
+					vert_swap[16 + (j * 36)] = vert2.y();
+					vert_swap[17 + (j * 36)] = vert2.z();
+
+					tex_swap[11 + (j * 24)] = tex2.x();
+					tex_swap[12 + (j * 24)] = tex2.y();
+
+					tex1 = vec2(sphereTex[4 + (j * 6)] - sphereTex[0 + (j * 6)] / 2, sphereTex[5 + (j * 6)] - sphereTex[1 + (j * 6)] / 2);
+					tex2 = vec2(sphereTex[4 + (j * 6)] - sphereTex[2 + (j * 6)] / 2, sphereTex[5 + (j * 6)] - sphereTex[3 + (j * 6)] / 2);
+
+					vert1 = vec3((sphere[6 + (j * 9)] + sphere[0 + (j * 9)]) / 2, (sphere[7 + (j * 9)] + sphere[1 + (j * 9)]) / 2, (sphere[8 + (j * 9)] + sphere[2 + (j * 9)]) / 2);
+					vert2 = vec3((sphere[6 + (j * 9)] + sphere[3 + (j * 9)]) / 2, (sphere[7 + (j * 9)] + sphere[4 + (j * 9)]) / 2, (sphere[8 + (j * 9)] + sphere[5 + (j * 9)]) / 2);
+
+					newVert3 = vert1;
+					newTex3 = tex1;
+
+					vert_swap[18 + (j * 36)] = sphere[6 + (j * 9)];
+					vert_swap[19 + (j * 36)] = sphere[7 + (j * 9)];
+					vert_swap[20 + (j * 36)] = sphere[8 + (j * 9)];
+
+					tex_swap[13 + (j * 24)] = sphereTex[4 + (j * 6)];
+					tex_swap[14 + (j * 24)] = sphereTex[5 + (j * 6)];
+
+					vert_swap[21 + (j * 36)] = vert1.x();
+					vert_swap[22 + (j * 36)] = vert1.y();
+					vert_swap[23 + (j * 36)] = vert1.z();
+
+					tex_swap[15 + (j * 24)] = tex1.x();
+					tex_swap[16 + (j * 24)] = tex1.y();
+
+					vert_swap[24 + (j * 36)] = vert2.x();
+					vert_swap[25 + (j * 36)] = vert2.y();
+					vert_swap[26 + (j * 36)] = vert2.z();
+
+					tex_swap[17 + (j * 24)] = tex2.x();
+					tex_swap[18 + (j * 24)] = tex2.y();
+
+					vert_swap[27 + (j * 36)] = newVert1.x();
+					vert_swap[28 + (j * 36)] = newVert1.y();
+					vert_swap[29 + (j * 36)] = newVert1.z();
+
+					tex_swap[19 + (j * 24)] = newTex1.x();
+					tex_swap[20 + (j * 24)] = newTex1.y();
+
+					vert_swap[30 + (j * 36)] = newVert2.x();
+					vert_swap[31 + (j * 36)] = newVert2.y();
+					vert_swap[32 + (j * 36)] = newVert2.z();
+
+					tex_swap[21 + (j * 24)] = newTex2.x();
+					tex_swap[22 + (j * 24)] = newTex2.y();
+
+					vert_swap[33 + (j * 36)] = newVert3.x();
+					vert_swap[34 + (j * 36)] = newVert3.y();
+					vert_swap[35 + (j * 36)] = newVert3.z();
+
+					tex_swap[23 + (j * 24)] = newTex3.x();
+					tex_swap[24 + (j * 24)] = newTex3.y();
+				}
+
+				//Normalize the octrahedron to form a unit length sphere.
+				//Multiply the sphere by the radius to expand the sphere to the radius size.
+				for (int j = 0; j < currentNumOfTriangles * 12; j++)
+				{
+					float magnitude = sqrt(pow(vert_swap[0 + (j * 3)], 2) + pow(vert_swap[1 + (j * 3)], 2) + pow(vert_swap[2 + (j * 3)], 2));
+
+					vert_swap[0 + (j * 3)] = vert_swap[0 + (j * 3)] / magnitude;
+					vert_swap[1 + (j * 3)] = vert_swap[1 + (j * 3)] / magnitude;
+					vert_swap[2 + (j * 3)] = vert_swap[2 + (j * 3)] / magnitude;
+
+					sphere[0 + (j * 3)] = vert_swap[0 + (j * 3)];
+					sphere[1 + (j * 3)] = vert_swap[1 + (j * 3)];
+					sphere[2 + (j * 3)] = vert_swap[2 + (j * 3)];
+
+					sphereTex[0 + (j * 2)] = tex_swap[0 + (j * 2)];
+					sphereTex[1 + (j * 2)] = tex_swap[1 + (j * 2)];
+				}
+			}
 		}
 
 		//A command to generate another tree.
@@ -218,7 +557,7 @@ namespace octet
 					else if (strcmp(buffer, "Iterations") == 0)
 					{
 						buffer = strtok(NULL, "\n");
-						iterations = atoi(buffer);
+						masterIterations = atoi(buffer);
 						buffer = strtok(NULL, "\n");
 					}
 
@@ -257,7 +596,7 @@ namespace octet
 		//set to.
 		void FormFormula(int treeType, glm::mat4 origin)
 		{
-			iterations = iterations + ((rand() % 3) - 1);
+			iterations = masterIterations + ((rand() % 2) - 1);
 
 			//Go through each iteration to form the formula.
 			for (int i = 0; i < iterations; i++)
@@ -689,6 +1028,15 @@ namespace octet
 
 			float angleOffset = 360.0f / branchSubSections;
 
+			std::vector<float> leafHeight;
+			std::vector<mat4t> leafMatrices;
+			
+			mat4t scaleMat;
+			scaleMat.loadIdentity();
+			scaleMat[0][0] = scale;
+			scaleMat[1][1] = scale;
+			scaleMat[2][2] = scale;
+
 			//Cycle through all the branches in the formedTree stack.
 			for (dynarray<TreeBox*>::iterator iter = formedTree.begin(); iter != formedTree.end(); iter++)
 			{
@@ -707,6 +1055,12 @@ namespace octet
 				currentRadius += radiusOffset;
 				nextRadius = currentRadius;
 
+				if (treeType > 0)
+				{
+					leafHeight.push_back((*iter)->branchHeight);
+					leafMatrices.push_back((*iter)->modelToWorld);
+				}
+
 				for (int i = 0; i < (*iter)->branchHeight; i++)
 				{
 					float currentAngle = 0.0f;
@@ -717,13 +1071,7 @@ namespace octet
 						currentRadius = currentRadius + (radiusOffset * 10);
 
 					for (int j = 0; j < branchSubSections; j++)
-					{
-						mat4t scaleMat;
-						scaleMat.loadIdentity();
-						scaleMat[0][0] = scale;
-						scaleMat[1][1] = scale;
-						scaleMat[2][2] = scale;
-						
+					{	
 						vec4 vert1 = vec4(currentRadius * cos(currentAngle * 0.0174532925f), ((float)i * (height * 2.0f)) - (*iter)->branchHeight, currentRadius * sin(currentAngle * 0.0174532925f), 1.0f) * (*iter)->modelToWorld * scaleMat * modelToWorld;
 						vec4 vert2 = vec4(nextRadius * cos(currentAngle * 0.0174532925f), ((float)(i + 1) * (height * 2.0f)) - (*iter)->branchHeight, nextRadius * sin(currentAngle * 0.0174532925f), 1.0f) * (*iter)->modelToWorld * scaleMat * modelToWorld;
 						vec4 vert3 = vec4(currentRadius * cos((currentAngle + angleOffset) * 0.0174532925f), ((float)i * (height * 2.0f)) - (*iter)->branchHeight, currentRadius * sin((currentAngle + angleOffset) * 0.0174532925f), 1.0f) * (*iter)->modelToWorld * scaleMat * modelToWorld;
@@ -787,28 +1135,88 @@ namespace octet
 				}
 			}
 			
-			if (treeType > 0)
-				MakeLeaves(formedTree, vertsSize);
+			MakeLeaves(leafHeight, leafMatrices, scaleMat, 3);
 
 			ClearTreeForm(formedTree);
 			ClearFormula();
 			LoadOriginalAxiom();
 		}
 
-		void MakeLeaves(dynarray<TreeBox*> &target, int size)
+		void MakeLeaves(std::vector<float> &leafHeight, std::vector<mat4t> leafMat, mat4t &scaleMat, int numberOfLeafQuads)
 		{
-			for (dynarray<TreeBox*>::iterator iter = target.begin(); iter != target.end(); iter++)
+			float radiusOffset = 360.0f / numberOfLeafQuads;
+
+			if (!done)
 			{
-				mat4t tempMat = (*iter)->modelToWorld;
-				float height = (*iter)->branchHeight;
-
-				tempMat.translate(0.0f, height / 2.0f, 0.0f);
-
-				for (int i = 0; i < 6; i++)
+				for (int i = 0; i < leafHeight.size(); i++)
 				{
+					leafMat[i].translate(0.0f, leafHeight[i] * 2.0f, 0.0f);
 
+					for (int j = 0; j < numberOfLeafQuads * 2; j++)
+					{
+						leafMat[i].rotateY(radiusOffset);
+
+						leafMat[i].translate(-1.0f, 1.0f, 0.0f);
+						vertices.push_back(leafMat[i].row(3).x());
+						vertices.push_back(leafMat[i].row(3).y());
+						vertices.push_back(leafMat[i].row(3).z());
+						vertices.push_back(2.0f);
+
+						texCoords.push_back(0);
+						texCoords.push_back(0);
+
+						leafMat[i].translate(2.0f, 0.0f, 0.0f);
+						vertices.push_back(leafMat[i].row(3).x());
+						vertices.push_back(leafMat[i].row(3).y());
+						vertices.push_back(leafMat[i].row(3).z());
+						vertices.push_back(2.0f);
+
+						texCoords.push_back(0);
+						texCoords.push_back(1);
+
+						leafMat[i].translate(0.0f, -2.0f, 0.0f);
+						vertices.push_back(leafMat[i].row(3).x());
+						vertices.push_back(leafMat[i].row(3).y());
+						vertices.push_back(leafMat[i].row(3).z());
+						vertices.push_back(2.0f);
+
+						texCoords.push_back(1);
+						texCoords.push_back(1);
+
+						leafMat[i].translate(-2.0f, 2.0f, 0.0f);
+						vertices.push_back(leafMat[i].row(3).x());
+						vertices.push_back(leafMat[i].row(3).y());
+						vertices.push_back(leafMat[i].row(3).z());
+						vertices.push_back(2.0f);
+
+						texCoords.push_back(0);
+						texCoords.push_back(0);
+
+						leafMat[i].translate(2.0f, -2.0f, 0.0f);
+						vertices.push_back(leafMat[i].row(3).x());
+						vertices.push_back(leafMat[i].row(3).y());
+						vertices.push_back(leafMat[i].row(3).z());
+						vertices.push_back(2.0f);
+
+						texCoords.push_back(1);
+						texCoords.push_back(1);
+
+						leafMat[i].translate(-2.0f, 0.0f, 0.0f);
+						vertices.push_back(leafMat[i].row(3).x());
+						vertices.push_back(leafMat[i].row(3).y());
+						vertices.push_back(leafMat[i].row(3).z());
+						vertices.push_back(2.0f);
+
+						texCoords.push_back(1);
+						texCoords.push_back(0);
+
+						leafMat[i].translate(1.0f, 1.0f, 0.0f);
+					}
+					break;
 				}
 			}
+
+			done = true;
 		}
 
 		void PrepareTrees()
