@@ -364,6 +364,12 @@
     <ClInclude Include="..\..\src\math\noise.h">
       <Filter>octet\math</Filter>
     </ClInclude>
+    <ClInclude Include="..\..\src\scene\sky.h">
+      <Filter>octet\scene</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\src\shaders\sky_shader.h">
+      <Filter>octet\shaders</Filter>
+    </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <None Include="..\..\src\resources\mesh_builder.inl">

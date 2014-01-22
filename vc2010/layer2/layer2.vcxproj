@@ -106,6 +106,7 @@
     <ClInclude Include="..\..\src\scene\scene_node.h" />
     <ClInclude Include="..\..\src\scene\skeleton.h" />
     <ClInclude Include="..\..\src\scene\skin.h" />
+    <ClInclude Include="..\..\src\scene\sky.h" />
     <ClInclude Include="..\..\src\scene\smooth.h" />
     <ClInclude Include="..\..\src\scene\UI_Element.h" />
     <ClInclude Include="..\..\src\scene\wireframe.h" />
@@ -113,6 +114,7 @@
     <ClInclude Include="..\..\src\shaders\color_shader.h" />
     <ClInclude Include="..\..\src\shaders\phong_shader.h" />
     <ClInclude Include="..\..\src\shaders\shader.h" />
+    <ClInclude Include="..\..\src\shaders\sky_shader.h" />
     <ClInclude Include="..\..\src\shaders\texture_shader.h" />
     <ClInclude Include="..\..\src\shaders\tree_shader.h" />
     <ClInclude Include="..\..\src\shaders\ui_shader.h" />

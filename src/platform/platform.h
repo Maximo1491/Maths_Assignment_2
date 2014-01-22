@@ -150,6 +150,7 @@ static char *get_sprintf_buffer() {
 #include "../shaders/ui_shader.h"
 #include "../shaders/tree_shader.h"
 #include "../physics/physics.h"
+#include "../shaders/sky_shader.h"
 
 //Thronecraft
 #define CX 16
@@ -184,6 +185,7 @@ static char *get_sprintf_buffer() {
 #include "../scene/mesh_text.h"
 #include "../scene/wireframe.h"
 #include "../scene/UI_Element.h"
+#include "../scene/sky.h"
 
 // high level helpers
 #include "../helpers/mouse_ball.h"
