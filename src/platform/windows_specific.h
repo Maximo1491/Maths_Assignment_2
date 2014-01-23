@@ -161,14 +161,14 @@ namespace octet {
 
 			if(desktop.right == 1920 && desktop.bottom == 1080)
       {
-				window_handle = CreateWindow(L"MyClass", L"Thronecraft",
-				  WS_OVERLAPPEDWINDOW, (int)(console.right * 0.7f + 20), 10, 900, 900,
+				window_handle = CreateWindow(L"MyClass", L"Volumetric - Terrain",
+				  WS_OVERLAPPEDWINDOW, (int)(console.right * 0.7f + 20), 180, 1280, 720,
 				  NULL, NULL, wndclass.hInstance, (LPVOID)this
 				);
 			}
 			else
 			{
-				window_handle = CreateWindow(L"MyClass", L"Thronecraft",
+				window_handle = CreateWindow(L"MyClass", L"Volumetric - Terrain",
 				  WS_OVERLAPPEDWINDOW, CW_USEDEFAULT, CW_USEDEFAULT, CW_USEDEFAULT, CW_USEDEFAULT,
 				  NULL, NULL, wndclass.hInstance, (LPVOID)this
 				);
