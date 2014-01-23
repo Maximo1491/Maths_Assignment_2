@@ -90,7 +90,7 @@ namespace octet
 			glActiveTexture(GL_TEXTURE1);
 			glBindTexture(GL_TEXTURE_2D, textures[1]);
 
-			image = SOIL_load_image("../../assets/thronecraft/leaf2.png", &width, &height, 0, SOIL_LOAD_RGBA);
+			image = SOIL_load_image("../../assets/thronecraft/leafs.png", &width, &height, 0, SOIL_LOAD_RGBA);
 			glTexImage2D(GL_TEXTURE_2D, 0, GL_RGBA, width, height, 0, GL_RGBA, GL_UNSIGNED_BYTE, image);
 
 			SOIL_free_image_data(image);
@@ -849,7 +849,7 @@ namespace octet
 				}
 			}
 			
-			MakeLeaves(leafHeight, leafMatrices, modelToWorld, scaleMat, 6);
+			MakeLeaves(leafHeight, leafMatrices, modelToWorld, scaleMat, 4);
 
 			ClearTreeForm(formedTree);
 			ClearFormula();
@@ -859,138 +859,150 @@ namespace octet
 		void MakeLeaves(std::vector<float> &leafHeight, std::vector<mat4t> leafMat, mat4t &origin, mat4t &scaleMat, int numberOfLeafQuads)
 		{
 			float radiusOffset = 360.0f / (numberOfLeafQuads * 2);
+			float highestBranch = 0.0f;
 
 			for (int i = 0; i < leafHeight.size(); i++)
 			{
-				float leafRadius = (3.0f / leafHeight[i]) + 1.0f;
+				if (leafHeight[i] > highestBranch) highestBranch = leafHeight[i];
+
+				float leafRadius = leafHeight[i] * 0.85;
+
+				if (leafRadius > 6.0f) leafRadius = 6.0f;
 
 				if (leafRadius > 0.2f && leafHeight[i] > 1.0f)
 				{
 					leafMat[i].translate(0.0f, leafHeight[i], 0.0f);
+					mat4t branchPos;
+					branchPos = leafMat[i];
+					branchPos + scaleMat;
 
-					for (int j = 0; j < numberOfLeafQuads; j++)
-					//for (int j = 0; j < numberOfLeafQuads * 2; j++)
+					if (branchPos.row(3).y() > highestBranch * 0.5)
+
 					{
-						//if (j < numberOfLeafQuads)
+						for (int j = 0; j < numberOfLeafQuads; j++)
+							//for (int j = 0; j < numberOfLeafQuads * 2; j++)
+						{
+							//if (j < numberOfLeafQuads)
 							leafMat[i].rotateY(radiusOffset);
-						//else
+							//else
 							//leafMat[i].rotateX(radiusOffset);
 
-						leafMat[i].translate(-leafRadius, leafRadius, 0.0f);
+							leafMat[i].translate(-leafRadius, leafRadius, 0.0f);
 
-						vec4 leafVert = vec4(leafMat[i].row(3).x(), leafMat[i].row(3).y(), leafMat[i].row(3).z(), 1.0f) * scaleMat;
+							vec4 leafVert = vec4(leafMat[i].row(3).x(), leafMat[i].row(3).y(), leafMat[i].row(3).z(), 1.0f) * scaleMat;
 
-						normals.push_back(leafVert.x());
-						normals.push_back(leafVert.y());
-						normals.push_back(leafVert.z());
-						normals.push_back(2.0f);
+							normals.push_back(leafVert.x());
+							normals.push_back(leafVert.y());
+							normals.push_back(leafVert.z());
+							normals.push_back(2.0f);
 
-						leafVert = leafVert * origin;
+							leafVert = leafVert * origin;
 
-						vertices.push_back(leafVert.x());
-						vertices.push_back(leafVert.y());
-						vertices.push_back(leafVert.z());
-						vertices.push_back(2.0f);
+							vertices.push_back(leafVert.x());
+							vertices.push_back(leafVert.y());
+							vertices.push_back(leafVert.z());
+							vertices.push_back(2.0f);
 
-						texCoords.push_back(0);
-						texCoords.push_back(0);
+							texCoords.push_back(0);
+							texCoords.push_back(0);
 
-						leafMat[i].translate(leafRadius * 2, 0.0f, 0.0f);
+							leafMat[i].translate(leafRadius * 2, 0.0f, 0.0f);
 
-						leafVert = vec4(leafMat[i].row(3).x(), leafMat[i].row(3).y(), leafMat[i].row(3).z(), 1.0f) * scaleMat;
+							leafVert = vec4(leafMat[i].row(3).x(), leafMat[i].row(3).y(), leafMat[i].row(3).z(), 1.0f) * scaleMat;
 
-						normals.push_back(leafVert.x());
-						normals.push_back(leafVert.y());
-						normals.push_back(leafVert.z());
-						normals.push_back(2.0f);
+							normals.push_back(leafVert.x());
+							normals.push_back(leafVert.y());
+							normals.push_back(leafVert.z());
+							normals.push_back(2.0f);
 
-						leafVert = leafVert * origin;
+							leafVert = leafVert * origin;
 
-						vertices.push_back(leafVert.x());
-						vertices.push_back(leafVert.y());
-						vertices.push_back(leafVert.z());
-						vertices.push_back(2.0f);
+							vertices.push_back(leafVert.x());
+							vertices.push_back(leafVert.y());
+							vertices.push_back(leafVert.z());
+							vertices.push_back(2.0f);
 
-						texCoords.push_back(0);
-						texCoords.push_back(1);
+							texCoords.push_back(0);
+							texCoords.push_back(1);
 
-						leafMat[i].translate(0.0f, -leafRadius * 2, 0.0f);
+							leafMat[i].translate(0.0f, -leafRadius * 2, 0.0f);
 
-						leafVert = vec4(leafMat[i].row(3).x(), leafMat[i].row(3).y(), leafMat[i].row(3).z(), 1.0f) * scaleMat;
+							leafVert = vec4(leafMat[i].row(3).x(), leafMat[i].row(3).y(), leafMat[i].row(3).z(), 1.0f) * scaleMat;
 
-						normals.push_back(leafVert.x());
-						normals.push_back(leafVert.y());
-						normals.push_back(leafVert.z());
-						normals.push_back(2.0f);
+							normals.push_back(leafVert.x());
+							normals.push_back(leafVert.y());
+							normals.push_back(leafVert.z());
+							normals.push_back(2.0f);
 
-						leafVert = leafVert * origin;
+							leafVert = leafVert * origin;
 
-						vertices.push_back(leafVert.x());
-						vertices.push_back(leafVert.y());
-						vertices.push_back(leafVert.z());
-						vertices.push_back(2.0f);
+							vertices.push_back(leafVert.x());
+							vertices.push_back(leafVert.y());
+							vertices.push_back(leafVert.z());
+							vertices.push_back(2.0f);
 
-						texCoords.push_back(1);
-						texCoords.push_back(1);
+							texCoords.push_back(1);
+							texCoords.push_back(1);
 
-						leafMat[i].translate(-leafRadius * 2, leafRadius * 2, 0.0f);
-					
-						leafVert = vec4(leafMat[i].row(3).x(), leafMat[i].row(3).y(), leafMat[i].row(3).z(), 1.0f) * scaleMat;
+							leafMat[i].translate(-leafRadius * 2, leafRadius * 2, 0.0f);
 
-						normals.push_back(leafVert.x());
-						normals.push_back(leafVert.y());
-						normals.push_back(leafVert.z());
-						normals.push_back(2.0f);
+							leafVert = vec4(leafMat[i].row(3).x(), leafMat[i].row(3).y(), leafMat[i].row(3).z(), 1.0f) * scaleMat;
 
-						leafVert = leafVert * origin;
+							normals.push_back(leafVert.x());
+							normals.push_back(leafVert.y());
+							normals.push_back(leafVert.z());
+							normals.push_back(2.0f);
 
-						vertices.push_back(leafVert.x());
-						vertices.push_back(leafVert.y());
-						vertices.push_back(leafVert.z());
-						vertices.push_back(2.0f);
+							leafVert = leafVert * origin;
 
-						texCoords.push_back(0);
-						texCoords.push_back(0);
+							vertices.push_back(leafVert.x());
+							vertices.push_back(leafVert.y());
+							vertices.push_back(leafVert.z());
+							vertices.push_back(2.0f);
 
-						leafMat[i].translate(leafRadius * 2, -leafRadius * 2, 0.0f);
-					
-						leafVert = vec4(leafMat[i].row(3).x(), leafMat[i].row(3).y(), leafMat[i].row(3).z(), 1.0f) * scaleMat;
+							texCoords.push_back(0);
+							texCoords.push_back(0);
 
-						normals.push_back(leafVert.x());
-						normals.push_back(leafVert.y());
-						normals.push_back(leafVert.z());
-						normals.push_back(2.0f);
+							leafMat[i].translate(leafRadius * 2, -leafRadius * 2, 0.0f);
 
-						leafVert = leafVert * origin;
+							leafVert = vec4(leafMat[i].row(3).x(), leafMat[i].row(3).y(), leafMat[i].row(3).z(), 1.0f) * scaleMat;
 
-						vertices.push_back(leafVert.x());
-						vertices.push_back(leafVert.y());
-						vertices.push_back(leafVert.z());
-						vertices.push_back(2.0f);
+							normals.push_back(leafVert.x());
+							normals.push_back(leafVert.y());
+							normals.push_back(leafVert.z());
+							normals.push_back(2.0f);
 
-						texCoords.push_back(1);
-						texCoords.push_back(1);
+							leafVert = leafVert * origin;
 
-						leafMat[i].translate(-leafRadius * 2, 0.0f, 0.0f);
-					
-						leafVert = vec4(leafMat[i].row(3).x(), leafMat[i].row(3).y(), leafMat[i].row(3).z(), 1.0f) * scaleMat;
+							vertices.push_back(leafVert.x());
+							vertices.push_back(leafVert.y());
+							vertices.push_back(leafVert.z());
+							vertices.push_back(2.0f);
 
-						normals.push_back(leafVert.x());
-						normals.push_back(leafVert.y());
-						normals.push_back(leafVert.z());
-						normals.push_back(2.0f);
+							texCoords.push_back(1);
+							texCoords.push_back(1);
 
-						leafVert = leafVert * origin;
+							leafMat[i].translate(-leafRadius * 2, 0.0f, 0.0f);
 
-						vertices.push_back(leafVert.x());
-						vertices.push_back(leafVert.y());
-						vertices.push_back(leafVert.z());
-						vertices.push_back(2.0f);
+							leafVert = vec4(leafMat[i].row(3).x(), leafMat[i].row(3).y(), leafMat[i].row(3).z(), 1.0f) * scaleMat;
 
-						texCoords.push_back(1);
-						texCoords.push_back(0);
+							normals.push_back(leafVert.x());
+							normals.push_back(leafVert.y());
+							normals.push_back(leafVert.z());
+							normals.push_back(2.0f);
 
-						leafMat[i].translate(leafRadius, leafRadius, 0.0f);
+							leafVert = leafVert * origin;
+
+							vertices.push_back(leafVert.x());
+							vertices.push_back(leafVert.y());
+							vertices.push_back(leafVert.z());
+							vertices.push_back(2.0f);
+
+							texCoords.push_back(1);
+							texCoords.push_back(0);
+
+							leafMat[i].translate(leafRadius, leafRadius, 0.0f);
+						}
 					}
 				}
 			}

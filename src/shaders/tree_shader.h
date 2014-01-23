@@ -61,9 +61,14 @@ namespace octet {
 				if (texType < 1.5)
 					gl_FragColor = texture2D(bark, f_texCoord) * f_color;
 				else
-					gl_FragColor = texture2D(leaf, f_texCoord) * f_color;
+				{
+					if (texture2D(leaf, f_texCoord).a > 0.0)
+						gl_FragColor = texture2D(leaf, f_texCoord) * f_color;
+					else
+						discard;
+				}
 			}
-		);
+			);
 
       shader::init(vertex_shader, fragment_shader);
 
