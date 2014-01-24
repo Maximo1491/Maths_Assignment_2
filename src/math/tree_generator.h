@@ -28,13 +28,13 @@ namespace octet
 		dynarray<std::string> rules;
 		dynarray<TreeBox*> formedTree;
 		dynarray<GLfloat> vertices, normals;
-		dynarray<GLfloat> texCoords;
+		dynarray<GLfloat> texCoords, colors;
 		std::vector<char> formula, newFormula;
 		GLfloat* sphere;
 		GLushort* sphereTex;
 		int sphereSize, sphereTexSize;
 
-		GLuint vbo, tbo, nbo, program;
+		GLuint vbo, tbo, nbo, cbo, program;
 		GLint uniform_matrix;
 
 	public:
@@ -67,6 +67,7 @@ namespace octet
 			glGenBuffers(1, &vbo);
 			glGenBuffers(1, &tbo);
 			glGenBuffers(1, &nbo);
+			glGenBuffers(1, &cbo);
 
 			GLuint textures[2];
 			//yoloswaggins
@@ -110,6 +111,7 @@ namespace octet
 			glDeleteBuffers(1, &vbo);
 			glDeleteBuffers(1, &tbo);
 			glDeleteBuffers(1, &nbo);
+			glDeleteBuffers(1, &cbo);
 		}
 
 		void render(glm::mat4 projection, tree_shader &tree_shader_, int numOfLights, const glm::vec4 *light_information, glm::vec4 ambient, glm::vec4 *diffuse)
@@ -117,18 +119,22 @@ namespace octet
 			tree_shader_.render(projection, numOfLights, light_information, ambient, diffuse);
 
 			glDisable(GL_CULL_FACE);
-			glEnable(GL_BLEND);
-			glBlendFunc (GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
+			//glEnable(GL_BLEND);
+			//glBlendFunc (GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
 
 			glEnableVertexAttribArray(attribute_pos);
 			glEnableVertexAttribArray(attribute_uv);
 			glEnableVertexAttribArray(attribute_normal);
+			glEnableVertexAttribArray(attribute_color);
 
 			glBindBuffer(GL_ARRAY_BUFFER, tbo);
 			glVertexAttribPointer(attribute_uv, 2, GL_UNSIGNED_SHORT, GL_FALSE, sizeof(GLushort) * 2, 0);
 
 			glBindBuffer(GL_ARRAY_BUFFER, nbo);
 			glVertexAttribPointer(attribute_normal, 4, GL_FLOAT, GL_FALSE, sizeof(GLfloat) * 4, 0);
+
+			glBindBuffer(GL_ARRAY_BUFFER, cbo);
+			glVertexAttribPointer(attribute_color, 4, GL_FLOAT, GL_FALSE, sizeof(GLfloat) * 4, 0);
 
 			glBindBuffer(GL_ARRAY_BUFFER, vbo);
 			glVertexAttribPointer(attribute_pos, 4, GL_FLOAT, GL_FALSE, sizeof(GLfloat) * 4, 0);
@@ -138,6 +144,7 @@ namespace octet
 			glDisableVertexAttribArray(attribute_pos);
 			glDisableVertexAttribArray(attribute_uv);
 			glDisableVertexAttribArray(attribute_normal);
+			glDisableVertexAttribArray(attribute_color);
 
 			glEnable(GL_CULL_FACE);
 		}
@@ -504,6 +511,9 @@ namespace octet
 			std::vector<mat4t> positionStack;
 			std::vector<int> indexStack;
 
+			vec4 barkColor;
+			vec4 leafColor;
+
 			treeBox = new TreeBox();
 			treeBox->branchHeight = 0;
 			treeBox->branchIndex = 0;
@@ -714,6 +724,26 @@ namespace octet
 			scaleMat[1][1] = scale;
 			scaleMat[2][2] = scale;
 
+			if (treeType > dead)
+			{
+				if (treeType == dying)
+				{
+					barkColor = vec4(0.75f, 0.75f, 0.75f, 1.0f);
+					leafColor = vec4(0.9f, 0.3f, 0.0f, 1.0f);
+				}
+				else
+				{
+					barkColor = vec4(1.0f, 1.0f, 1.0f, 1.0f);
+					leafColor = vec4(1.0f, 1.0f, 1.0f, 1.0f);
+				}
+			}
+
+			else
+			{
+				barkColor = vec4(0.35f, 0.35f, 0.35f, 1.0f);
+				leafColor = vec4(0.0f, 0.0f, 0.0f, 1.0f);
+			}
+
 			//Cycle through all the branches in the formedTree stack.
 			for (dynarray<TreeBox*>::iterator iter = formedTree.begin(); iter != formedTree.end(); iter++)
 			{
@@ -749,12 +779,12 @@ namespace octet
 
 					for (int j = 0; j < branchSubSections; j++)
 					{	
-						vec4 vert1 = vec4(currentRadius * cos(currentAngle * 0.0174532925f), ((float)i * (height * 2.0f)) - (*iter)->branchHeight, currentRadius * sin(currentAngle * 0.0174532925f), 1.0f) * (*iter)->modelToWorld;
-						vec4 vert2 = vec4(nextRadius * cos(currentAngle * 0.0174532925f), ((float)(i + 1) * (height * 2.0f)) - (*iter)->branchHeight, nextRadius * sin(currentAngle * 0.0174532925f), 1.0f) * (*iter)->modelToWorld;
-						vec4 vert3 = vec4(currentRadius * cos((currentAngle + angleOffset) * 0.0174532925f), ((float)i * (height * 2.0f)) - (*iter)->branchHeight, currentRadius * sin((currentAngle + angleOffset) * 0.0174532925f), 1.0f) * (*iter)->modelToWorld;
-						vec4 vert4 = vec4(currentRadius * cos((currentAngle + angleOffset) * 0.0174532925f), ((float)i * (height * 2.0f)) - (*iter)->branchHeight, currentRadius * sin((currentAngle + angleOffset) * 0.0174532925f), 1.0f) * (*iter)->modelToWorld;
-						vec4 vert5 = vec4(nextRadius * cos(currentAngle * 0.0174532925f), ((float)(i + 1) * (height * 2.0f)) - (*iter)->branchHeight, nextRadius * sin(currentAngle * 0.0174532925f), 1.0f) * (*iter)->modelToWorld;
-						vec4 vert6 = vec4(nextRadius * cos((currentAngle + angleOffset) * 0.0174532925f), ((float)(i + 1) * (height * 2.0f)) - (*iter)->branchHeight, nextRadius * sin((currentAngle + angleOffset) * 0.0174532925f), 1.0f) * (*iter)->modelToWorld;
+						vec4 vert1 = vec4(currentRadius * cos(currentAngle * 0.0174532925f), ((float)i * (height * 2.0f) + 1.0f) - (*iter)->branchHeight, currentRadius * sin(currentAngle * 0.0174532925f), 1.0f) * (*iter)->modelToWorld;
+						vec4 vert2 = vec4(nextRadius * cos(currentAngle * 0.0174532925f), ((float)(i + 1) * (height * 2.0f) + 1.0f) - (*iter)->branchHeight, nextRadius * sin(currentAngle * 0.0174532925f), 1.0f) * (*iter)->modelToWorld;
+						vec4 vert3 = vec4(currentRadius * cos((currentAngle + angleOffset) * 0.0174532925f), ((float)i * (height * 2.0f) + 1.0f) - (*iter)->branchHeight, currentRadius * sin((currentAngle + angleOffset) * 0.0174532925f), 1.0f) * (*iter)->modelToWorld;
+						vec4 vert4 = vec4(currentRadius * cos((currentAngle + angleOffset) * 0.0174532925f), ((float)i * (height * 2.0f) + 1.0f) - (*iter)->branchHeight, currentRadius * sin((currentAngle + angleOffset) * 0.0174532925f), 1.0f) * (*iter)->modelToWorld;
+						vec4 vert5 = vec4(nextRadius * cos(currentAngle * 0.0174532925f), ((float)(i + 1) * (height * 2.0f) + 1.0f) - (*iter)->branchHeight, nextRadius * sin(currentAngle * 0.0174532925f), 1.0f) * (*iter)->modelToWorld;
+						vec4 vert6 = vec4(nextRadius * cos((currentAngle + angleOffset) * 0.0174532925f), ((float)(i + 1) * (height * 2.0f) + 1.0f) - (*iter)->branchHeight, nextRadius * sin((currentAngle + angleOffset) * 0.0174532925f), 1.0f) * (*iter)->modelToWorld;
 
 						normals.push_back(vert1.x());
 						normals.push_back(vert1.y());
@@ -786,12 +816,12 @@ namespace octet
 						normals.push_back(vert6.z());
 						normals.push_back(vert6.w());
 
-						vert1 = vert1 * scaleMat * modelToWorld;
-						vert2 = vert2 * scaleMat * modelToWorld;
-						vert3 = vert3 * scaleMat * modelToWorld;
-						vert4 = vert4 * scaleMat * modelToWorld;
-						vert5 = vert5 * scaleMat * modelToWorld;
-						vert6 = vert6 * scaleMat * modelToWorld;
+						vert1 = vec4(currentRadius * cos(currentAngle * 0.0174532925f), ((float)i * (height * 2.0f)) - (*iter)->branchHeight, currentRadius * sin(currentAngle * 0.0174532925f), 1.0f) * (*iter)->modelToWorld * scaleMat * modelToWorld;
+						vert2 = vec4(nextRadius * cos(currentAngle * 0.0174532925f), ((float)(i + 1) * (height * 2.0f)) - (*iter)->branchHeight, nextRadius * sin(currentAngle * 0.0174532925f), 1.0f) * (*iter)->modelToWorld * scaleMat * modelToWorld;
+						vert3 = vec4(currentRadius * cos((currentAngle + angleOffset) * 0.0174532925f), ((float)i * (height * 2.0f)) - (*iter)->branchHeight, currentRadius * sin((currentAngle + angleOffset) * 0.0174532925f), 1.0f) * (*iter)->modelToWorld * scaleMat * modelToWorld;
+						vert4 = vec4(currentRadius * cos((currentAngle + angleOffset) * 0.0174532925f), ((float)i * (height * 2.0f)) - (*iter)->branchHeight, currentRadius * sin((currentAngle + angleOffset) * 0.0174532925f), 1.0f) * (*iter)->modelToWorld * scaleMat * modelToWorld;
+						vert5 = vec4(nextRadius * cos(currentAngle * 0.0174532925f), ((float)(i + 1) * (height * 2.0f)) - (*iter)->branchHeight, nextRadius * sin(currentAngle * 0.0174532925f), 1.0f) * (*iter)->modelToWorld * scaleMat * modelToWorld;
+						vert6 = vec4(nextRadius * cos((currentAngle + angleOffset) * 0.0174532925f), ((float)(i + 1) * (height * 2.0f)) - (*iter)->branchHeight, nextRadius * sin((currentAngle + angleOffset) * 0.0174532925f), 1.0f) * (*iter)->modelToWorld * scaleMat * modelToWorld;
 
 						vertices.push_back(vert1.x());
 						vertices.push_back(vert1.y());
@@ -801,6 +831,11 @@ namespace octet
 						texCoords.push_back(0);
 						texCoords.push_back(0);
 
+						colors.push_back(barkColor.x());
+						colors.push_back(barkColor.y());
+						colors.push_back(barkColor.z());
+						colors.push_back(barkColor.w());
+
 						vertices.push_back(vert2.x());
 						vertices.push_back(vert2.y());
 						vertices.push_back(vert2.z());
@@ -808,6 +843,11 @@ namespace octet
 
 						texCoords.push_back(0);
 						texCoords.push_back(1);
+
+						colors.push_back(barkColor.x());
+						colors.push_back(barkColor.y());
+						colors.push_back(barkColor.z());
+						colors.push_back(barkColor.w());
 
 						vertices.push_back(vert3.x());
 						vertices.push_back(vert3.y());
@@ -817,6 +857,11 @@ namespace octet
 						texCoords.push_back(1);
 						texCoords.push_back(1);
 
+						colors.push_back(barkColor.x());
+						colors.push_back(barkColor.y());
+						colors.push_back(barkColor.z());
+						colors.push_back(barkColor.w());
+
 						vertices.push_back(vert4.x());
 						vertices.push_back(vert4.y());
 						vertices.push_back(vert4.z());
@@ -824,6 +869,11 @@ namespace octet
 
 						texCoords.push_back(0);
 						texCoords.push_back(1);
+
+						colors.push_back(barkColor.x());
+						colors.push_back(barkColor.y());
+						colors.push_back(barkColor.z());
+						colors.push_back(barkColor.w());
 
 						vertices.push_back(vert5.x());
 						vertices.push_back(vert5.y());
@@ -833,6 +883,11 @@ namespace octet
 						texCoords.push_back(1);
 						texCoords.push_back(1);
 
+						colors.push_back(barkColor.x());
+						colors.push_back(barkColor.y());
+						colors.push_back(barkColor.z());
+						colors.push_back(barkColor.w());
+
 						vertices.push_back(vert6.x());
 						vertices.push_back(vert6.y());
 						vertices.push_back(vert6.z());
@@ -840,6 +895,11 @@ namespace octet
 
 						texCoords.push_back(1);
 						texCoords.push_back(0);
+
+						colors.push_back(barkColor.x());
+						colors.push_back(barkColor.y());
+						colors.push_back(barkColor.z());
+						colors.push_back(barkColor.w());
 
 						currentAngle += angleOffset;
 					}
@@ -849,14 +909,14 @@ namespace octet
 				}
 			}
 			
-			MakeLeaves(leafHeight, leafMatrices, modelToWorld, scaleMat, 4);
+			MakeLeaves(leafHeight, leafMatrices, modelToWorld, scaleMat, 4, leafColor);
 
 			ClearTreeForm(formedTree);
 			ClearFormula();
 			LoadOriginalAxiom();
 		}
 
-		void MakeLeaves(std::vector<float> &leafHeight, std::vector<mat4t> leafMat, mat4t &origin, mat4t &scaleMat, int numberOfLeafQuads)
+		void MakeLeaves(std::vector<float> &leafHeight, std::vector<mat4t> leafMat, mat4t &origin, mat4t &scaleMat, int numberOfLeafQuads, vec4 &leafColor)
 		{
 			float radiusOffset = 360.0f / (numberOfLeafQuads * 2);
 			float highestBranch = 0.0f;
@@ -896,6 +956,11 @@ namespace octet
 							normals.push_back(leafVert.z());
 							normals.push_back(2.0f);
 
+							colors.push_back(leafColor.x());
+							colors.push_back(leafColor.y());
+							colors.push_back(leafColor.z());
+							colors.push_back(leafColor.w());
+
 							leafVert = leafVert * origin;
 
 							vertices.push_back(leafVert.x());
@@ -914,6 +979,11 @@ namespace octet
 							normals.push_back(leafVert.y());
 							normals.push_back(leafVert.z());
 							normals.push_back(2.0f);
+
+							colors.push_back(leafColor.x());
+							colors.push_back(leafColor.y());
+							colors.push_back(leafColor.z());
+							colors.push_back(leafColor.w());
 
 							leafVert = leafVert * origin;
 
@@ -934,6 +1004,11 @@ namespace octet
 							normals.push_back(leafVert.z());
 							normals.push_back(2.0f);
 
+							colors.push_back(leafColor.x());
+							colors.push_back(leafColor.y());
+							colors.push_back(leafColor.z());
+							colors.push_back(leafColor.w());
+
 							leafVert = leafVert * origin;
 
 							vertices.push_back(leafVert.x());
@@ -952,6 +1027,11 @@ namespace octet
 							normals.push_back(leafVert.y());
 							normals.push_back(leafVert.z());
 							normals.push_back(2.0f);
+
+							colors.push_back(leafColor.x());
+							colors.push_back(leafColor.y());
+							colors.push_back(leafColor.z());
+							colors.push_back(leafColor.w());
 
 							leafVert = leafVert * origin;
 
@@ -972,6 +1052,11 @@ namespace octet
 							normals.push_back(leafVert.z());
 							normals.push_back(2.0f);
 
+							colors.push_back(leafColor.x());
+							colors.push_back(leafColor.y());
+							colors.push_back(leafColor.z());
+							colors.push_back(leafColor.w());
+
 							leafVert = leafVert * origin;
 
 							vertices.push_back(leafVert.x());
@@ -990,6 +1075,11 @@ namespace octet
 							normals.push_back(leafVert.y());
 							normals.push_back(leafVert.z());
 							normals.push_back(2.0f);
+
+							colors.push_back(leafColor.x());
+							colors.push_back(leafColor.y());
+							colors.push_back(leafColor.z());
+							colors.push_back(leafColor.w());
 
 							leafVert = leafVert * origin;
 
@@ -1013,6 +1103,7 @@ namespace octet
 			GLfloat* vs = new GLfloat[vertices.size()];
 			GLfloat* ns = new GLfloat[normals.size()];
 			GLushort* ts = new GLushort[texCoords.size()];
+			GLfloat* cs = new GLfloat[colors.size()];
 
 			for (int i = 0; i < vertices.size(); i++)
 				vs[i] = vertices[i];
@@ -1023,6 +1114,9 @@ namespace octet
 			for (int i = 0; i < normals.size(); i++)
 				ns[i] = normals[i];
 
+			for (int i = 0; i < colors.size(); i++)
+				cs[i] = colors[i];
+
 			glBindBuffer(GL_ARRAY_BUFFER, vbo);
 			glBufferData(GL_ARRAY_BUFFER, vertices.size() * sizeof(GLfloat), vs, GL_STATIC_DRAW);
 
@@ -1032,9 +1126,13 @@ namespace octet
 			glBindBuffer(GL_ARRAY_BUFFER, nbo);
 			glBufferData(GL_ARRAY_BUFFER, normals.size() * sizeof(GLfloat), ns, GL_STATIC_DRAW);
 
+			glBindBuffer(GL_ARRAY_BUFFER, cbo);
+			glBufferData(GL_ARRAY_BUFFER, colors.size() * sizeof(GLfloat), cs, GL_STATIC_DRAW);
+
 			delete[] vs;
 			delete[] ts;
 			delete[] ns;
+			delete[] cs;
 		}
 
 		//A function to clear all branched from the formedTree stack.
