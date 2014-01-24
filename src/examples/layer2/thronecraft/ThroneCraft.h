@@ -186,13 +186,12 @@ namespace octet
 							c->set(x, i, z, stone);
 					}
 
-					int r = rand() % 150;
+					int r = rand() % 1000;
 
 					if (r == 1 && y <= 100)
 					{
 						//std::cout << "Adding Tree";
-						int treeType = rand() % 3;
-						tg->AddTree(treeType, glm::vec3(x + 0.5f, y + 1.0f, z + 0.5f));
+						tg->AddTree(tree_generator::alive, glm::vec3(x + 0.5f, y + 1.0f, z + 0.5f));
 					}
 				}
 			}
