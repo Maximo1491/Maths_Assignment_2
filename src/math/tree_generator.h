@@ -70,7 +70,7 @@ namespace octet
 			glGenBuffers(1, &cbo);
 
 			GLuint textures[2];
-
+			//yoloswaggins
 			//Generate a buffer for the bark texture
 			glGenTextures(2, textures);
 			glEnable(GL_TEXTURE_2D);
