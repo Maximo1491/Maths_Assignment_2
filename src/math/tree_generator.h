@@ -678,7 +678,7 @@ namespace octet
 					if (treeBox->branchIndex >= (int)formedTree.size())
 					{
 						treeBox->branchIndex = formedTree.size();
-						formedTree.push_back(treeBox);
+						//formedTree.push_back(treeBox);
 					}
 
 					else
