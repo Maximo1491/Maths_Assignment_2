@@ -10,6 +10,7 @@ namespace octet {
 			const int maxLights = 8;
 			
 			attribute vec4 pos;
+			attribute vec4 color;
 			attribute vec2 uv;
 			attribute vec4 normal;
 			
@@ -29,20 +30,20 @@ namespace octet {
 				f_texCoord = uv;
 				texType = pos.w;
 
-				vec4 ambientColor = ambient * vec4(1.0, 1.0, 1.0, 1.0);
+				vec4 ambientColor = ambient * color;
 				vec4 diffuseFactor = vec4(0.0, 0.0, 0.0, 0.0);
 
 				vec3 v_normal = normalize(normal).xyz;
 				
-				for (int i = 0; i < numOfLights; i++)
-				{
-					vec3 L = normalize(light[i]).xyz;
+				//for (int i = 0; i < numOfLights; i++)
+				//{
+					vec3 L = normalize(light[0]).xyz;
 
 					float diffusePercentage = max(dot(L, v_normal), 0.0);
-					diffuseFactor += diffusePercentage * diffuse[i];
-				}
+					diffuseFactor += diffusePercentage * diffuse[0];
+				//}
 
-				vec4 diffuseColor = diffuseFactor * vec4(1.0, 1.0, 1.0, 1.0);
+				vec4 diffuseColor = diffuseFactor * color;
 
 				f_color = vec4((ambientColor + diffuseColor).xyz, 1.0);
 			}
@@ -62,7 +63,7 @@ namespace octet {
 					gl_FragColor = texture2D(bark, f_texCoord) * f_color;
 				else
 				{
-					if (texture2D(leaf, f_texCoord).a > 0.0)
+					if (texture2D(leaf, f_texCoord).a > 0.5)
 						gl_FragColor = texture2D(leaf, f_texCoord) * f_color;
 					else
 						discard;
