@@ -1,7 +1,8 @@
 namespace octet {
   class tree_shader : public shader 
 	{
-    GLuint modelToProjectionIndex_, uniform_texture0, uniform_texture1, uniform_ambient, uniform_diffuse, uniform_light, uniform_numOfLights;
+    GLuint modelToProjectionIndex_, uniform_ambient, uniform_diffuse, uniform_light, uniform_numOfLights;
+	GLuint uniform_texture0, uniform_texture1, uniform_texture2, uniform_texture3, uniform_texture4, uniform_texture5, uniform_texture6;
 
   public:
     void init() 
@@ -55,16 +56,56 @@ namespace octet {
 			varying vec4 f_color;
 			
 			uniform sampler2D bark;
-			uniform sampler2D leaf;
+			uniform sampler2D leaf0;
+			uniform sampler2D leaf1;
+			uniform sampler2D leaf2;
+			uniform sampler2D leaf3;
+			uniform sampler2D leaf4;
+			uniform sampler2D leaf5;
 			
 			void main()
 			{
-				if (texType < 1.5)
+				if (texType == 0.0)
 					gl_FragColor = texture2D(bark, f_texCoord) * f_color;
-				else
+				else if (texType == 1.0)
 				{
-					if (texture2D(leaf, f_texCoord).a > 0.5)
-						gl_FragColor = texture2D(leaf, f_texCoord) * f_color;
+					if (texture2D(leaf0, f_texCoord).a > 0.5)
+						gl_FragColor = texture2D(leaf0, f_texCoord) * f_color;
+					else
+						discard;
+				}
+				else if (texType == 2.0)
+				{
+					if (texture2D(leaf1, f_texCoord).a > 0.5)
+						gl_FragColor = texture2D(leaf1, f_texCoord) * f_color;
+					else
+						discard;
+				}
+				else if (texType == 3.0)
+				{
+					if (texture2D(leaf2, f_texCoord).a > 0.5)
+						gl_FragColor = texture2D(leaf2, f_texCoord) * f_color;
+					else
+						discard;
+				}
+				else if (texType == 4.0)
+				{
+					if (texture2D(leaf3, f_texCoord).a > 0.5)
+						gl_FragColor = texture2D(leaf3, f_texCoord) * f_color;
+					else
+						discard;
+				}
+				else if (texType == 5.0)
+				{
+					if (texture2D(leaf4, f_texCoord).a > 0.5)
+						gl_FragColor = texture2D(leaf4, f_texCoord) * f_color;
+					else
+						discard;
+				}
+				else if (texType == 6.0)
+				{
+					if (texture2D(leaf5, f_texCoord).a > 0.5)
+						gl_FragColor = texture2D(leaf5, f_texCoord) * f_color;
 					else
 						discard;
 				}
@@ -75,7 +116,12 @@ namespace octet {
 
       modelToProjectionIndex_ = glGetUniformLocation(program(), "matrix");
 	  uniform_texture0 = glGetUniformLocation(program(), "bark");
-	  uniform_texture1 = glGetUniformLocation(program(), "leaf");
+	  uniform_texture1 = glGetUniformLocation(program(), "leaf0");
+	  uniform_texture2 = glGetUniformLocation(program(), "leaf1");
+	  uniform_texture3 = glGetUniformLocation(program(), "leaf2");
+	  uniform_texture4 = glGetUniformLocation(program(), "leaf3");
+	  uniform_texture5 = glGetUniformLocation(program(), "leaf4");
+	  uniform_texture6 = glGetUniformLocation(program(), "leaf5");
 	  uniform_ambient = glGetUniformLocation(program(), "ambient");
 	  uniform_diffuse = glGetUniformLocation(program(), "diffuse");
 	  uniform_light = glGetUniformLocation(program(), "light");
@@ -109,6 +155,11 @@ namespace octet {
 		glUniformMatrix4fv( modelToProjectionIndex_, 1, GL_FALSE, modelToWorld.get() );
 		glUniform1i( uniform_texture0, 0 );
 		glUniform1i( uniform_texture1, 1 );
+		glUniform1i( uniform_texture2, 2 );
+		glUniform1i( uniform_texture3, 3 );
+		glUniform1i( uniform_texture4, 4 );
+		glUniform1i( uniform_texture5, 5 );
+		glUniform1i( uniform_texture6, 6 );
 		glUniform4f( uniform_ambient, ambient.x, ambient.y, ambient.z, ambient.w );
 		glUniform4fv( uniform_diffuse, numOfLights, (float*)diffuse );
 		glUniform4fv( uniform_light, numOfLights, (float*)light_information );

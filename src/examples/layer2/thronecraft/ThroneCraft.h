@@ -186,7 +186,7 @@ namespace octet
 							c->set(x, i, z, stone);
 					}
 
-					int r = rand() % 150;
+					int r = rand() % 500;
 
 					if (r == 1 && y <= 100)
 					{

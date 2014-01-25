@@ -21,7 +21,7 @@ namespace octet
 
 		//Declare all variables here
 		int iterations, masterIterations, maxIterations, ignoreSize, numberOfBranches, branchSubSections;
-		float height, width, depth, branchRadius, angle, leafWidth, scale;
+		float height, width, depth, branchRadius, angle, leafWidth, scale, leafTexture;
 		string originalAxiom, ignore;
 		bool done;
 
@@ -69,10 +69,10 @@ namespace octet
 			glGenBuffers(1, &nbo);
 			glGenBuffers(1, &cbo);
 
-			GLuint textures[2];
+			GLuint textures[7];
 			//yoloswaggins
 			//Generate a buffer for the bark texture
-			glGenTextures(2, textures);
+			glGenTextures(7, textures);
 			glEnable(GL_TEXTURE_2D);
 			glActiveTexture(GL_TEXTURE0);
 			glBindTexture(GL_TEXTURE_2D, textures[0]);
@@ -88,10 +88,79 @@ namespace octet
 			glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_LINEAR);
 			glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_LINEAR);
 
+			//Alive leaves
+
 			glActiveTexture(GL_TEXTURE1);
 			glBindTexture(GL_TEXTURE_2D, textures[1]);
 
-			image = SOIL_load_image("../../assets/thronecraft/leafs.png", &width, &height, 0, SOIL_LOAD_RGBA);
+			image = SOIL_load_image("../../assets/thronecraft/leaf0.png", &width, &height, 0, SOIL_LOAD_RGBA);
+			glTexImage2D(GL_TEXTURE_2D, 0, GL_RGBA, width, height, 0, GL_RGBA, GL_UNSIGNED_BYTE, image);
+
+			SOIL_free_image_data(image);
+
+			glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, GL_MIRRORED_REPEAT);
+			glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, GL_MIRRORED_REPEAT);
+			glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_LINEAR);
+			glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_LINEAR);
+
+			glActiveTexture(GL_TEXTURE2);
+			glBindTexture(GL_TEXTURE_2D, textures[2]);
+
+			image = SOIL_load_image("../../assets/thronecraft/leaf1.png", &width, &height, 0, SOIL_LOAD_RGBA);
+			glTexImage2D(GL_TEXTURE_2D, 0, GL_RGBA, width, height, 0, GL_RGBA, GL_UNSIGNED_BYTE, image);
+
+			SOIL_free_image_data(image);
+
+			glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, GL_MIRRORED_REPEAT);
+			glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, GL_MIRRORED_REPEAT);
+			glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_LINEAR);
+			glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_LINEAR);
+
+			glActiveTexture(GL_TEXTURE3);
+			glBindTexture(GL_TEXTURE_2D, textures[3]);
+
+			image = SOIL_load_image("../../assets/thronecraft/leaf2.png", &width, &height, 0, SOIL_LOAD_RGBA);
+			glTexImage2D(GL_TEXTURE_2D, 0, GL_RGBA, width, height, 0, GL_RGBA, GL_UNSIGNED_BYTE, image);
+
+			SOIL_free_image_data(image);
+
+			glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, GL_MIRRORED_REPEAT);
+			glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, GL_MIRRORED_REPEAT);
+			glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_LINEAR);
+			glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_LINEAR);
+
+			//Dead leaves
+
+			glActiveTexture(GL_TEXTURE4);
+			glBindTexture(GL_TEXTURE_2D, textures[4]);
+
+			image = SOIL_load_image("../../assets/thronecraft/leaf3.png", &width, &height, 0, SOIL_LOAD_RGBA);
+			glTexImage2D(GL_TEXTURE_2D, 0, GL_RGBA, width, height, 0, GL_RGBA, GL_UNSIGNED_BYTE, image);
+
+			SOIL_free_image_data(image);
+
+			glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, GL_MIRRORED_REPEAT);
+			glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, GL_MIRRORED_REPEAT);
+			glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_LINEAR);
+			glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_LINEAR);
+
+			glActiveTexture(GL_TEXTURE5);
+			glBindTexture(GL_TEXTURE_2D, textures[5]);
+
+			image = SOIL_load_image("../../assets/thronecraft/leaf4.png", &width, &height, 0, SOIL_LOAD_RGBA);
+			glTexImage2D(GL_TEXTURE_2D, 0, GL_RGBA, width, height, 0, GL_RGBA, GL_UNSIGNED_BYTE, image);
+
+			SOIL_free_image_data(image);
+
+			glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, GL_MIRRORED_REPEAT);
+			glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, GL_MIRRORED_REPEAT);
+			glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_LINEAR);
+			glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_LINEAR);
+
+			glActiveTexture(GL_TEXTURE6);
+			glBindTexture(GL_TEXTURE_2D, textures[6]);
+
+			image = SOIL_load_image("../../assets/thronecraft/leaf5.png", &width, &height, 0, SOIL_LOAD_RGBA);
 			glTexImage2D(GL_TEXTURE_2D, 0, GL_RGBA, width, height, 0, GL_RGBA, GL_UNSIGNED_BYTE, image);
 
 			SOIL_free_image_data(image);
@@ -724,17 +793,21 @@ namespace octet
 			scaleMat[1][1] = scale;
 			scaleMat[2][2] = scale;
 
+			leafColor = vec4(1.0f, 1.0f, 1.0f, 1.0f);
+
 			if (treeType > dead)
 			{
 				if (treeType == dying)
 				{
 					barkColor = vec4(0.75f, 0.75f, 0.75f, 1.0f);
-					leafColor = vec4(0.9f, 0.3f, 0.0f, 1.0f);
+					//use (leaf) textures 4-7
+					leafTexture = (float)(rand() % 3 + 4) ;
 				}
 				else
 				{
 					barkColor = vec4(1.0f, 1.0f, 1.0f, 1.0f);
-					leafColor = vec4(1.0f, 1.0f, 1.0f, 1.0f);
+					//use (leaf) textures 1-3
+					leafTexture = (float)(rand() % 3 + 1);
 				}
 			}
 
@@ -826,7 +899,7 @@ namespace octet
 						vertices.push_back(vert1.x());
 						vertices.push_back(vert1.y());
 						vertices.push_back(vert1.z());
-						vertices.push_back(vert1.w());
+						vertices.push_back(0.0f);
 
 						texCoords.push_back(0);
 						texCoords.push_back(0);
@@ -839,7 +912,7 @@ namespace octet
 						vertices.push_back(vert2.x());
 						vertices.push_back(vert2.y());
 						vertices.push_back(vert2.z());
-						vertices.push_back(vert2.w());
+						vertices.push_back(0.0f);
 
 						texCoords.push_back(0);
 						texCoords.push_back(1);
@@ -852,7 +925,7 @@ namespace octet
 						vertices.push_back(vert3.x());
 						vertices.push_back(vert3.y());
 						vertices.push_back(vert3.z());
-						vertices.push_back(vert3.w());
+						vertices.push_back(0.0f);
 
 						texCoords.push_back(1);
 						texCoords.push_back(1);
@@ -865,7 +938,7 @@ namespace octet
 						vertices.push_back(vert4.x());
 						vertices.push_back(vert4.y());
 						vertices.push_back(vert4.z());
-						vertices.push_back(vert4.w());
+						vertices.push_back(0.0f);
 
 						texCoords.push_back(0);
 						texCoords.push_back(1);
@@ -878,7 +951,7 @@ namespace octet
 						vertices.push_back(vert5.x());
 						vertices.push_back(vert5.y());
 						vertices.push_back(vert5.z());
-						vertices.push_back(vert5.w());
+						vertices.push_back(0.0f);
 
 						texCoords.push_back(1);
 						texCoords.push_back(1);
@@ -891,7 +964,7 @@ namespace octet
 						vertices.push_back(vert6.x());
 						vertices.push_back(vert6.y());
 						vertices.push_back(vert6.z());
-						vertices.push_back(vert6.w());
+						vertices.push_back(0.0f);
 
 						texCoords.push_back(1);
 						texCoords.push_back(0);
@@ -966,7 +1039,7 @@ namespace octet
 							vertices.push_back(leafVert.x());
 							vertices.push_back(leafVert.y());
 							vertices.push_back(leafVert.z());
-							vertices.push_back(2.0f);
+							vertices.push_back(leafTexture);
 
 							texCoords.push_back(0);
 							texCoords.push_back(0);
@@ -990,7 +1063,7 @@ namespace octet
 							vertices.push_back(leafVert.x());
 							vertices.push_back(leafVert.y());
 							vertices.push_back(leafVert.z());
-							vertices.push_back(2.0f);
+							vertices.push_back(leafTexture);
 
 							texCoords.push_back(0);
 							texCoords.push_back(1);
@@ -1014,7 +1087,7 @@ namespace octet
 							vertices.push_back(leafVert.x());
 							vertices.push_back(leafVert.y());
 							vertices.push_back(leafVert.z());
-							vertices.push_back(2.0f);
+							vertices.push_back(leafTexture);
 
 							texCoords.push_back(1);
 							texCoords.push_back(1);
@@ -1038,7 +1111,7 @@ namespace octet
 							vertices.push_back(leafVert.x());
 							vertices.push_back(leafVert.y());
 							vertices.push_back(leafVert.z());
-							vertices.push_back(2.0f);
+							vertices.push_back(leafTexture);
 
 							texCoords.push_back(0);
 							texCoords.push_back(0);
@@ -1062,7 +1135,7 @@ namespace octet
 							vertices.push_back(leafVert.x());
 							vertices.push_back(leafVert.y());
 							vertices.push_back(leafVert.z());
-							vertices.push_back(2.0f);
+							vertices.push_back(leafTexture);
 
 							texCoords.push_back(1);
 							texCoords.push_back(1);
@@ -1086,7 +1159,7 @@ namespace octet
 							vertices.push_back(leafVert.x());
 							vertices.push_back(leafVert.y());
 							vertices.push_back(leafVert.z());
-							vertices.push_back(2.0f);
+							vertices.push_back(leafTexture);
 
 							texCoords.push_back(1);
 							texCoords.push_back(0);
