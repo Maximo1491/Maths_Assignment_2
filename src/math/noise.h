@@ -7,16 +7,16 @@ namespace octet {
 
 		float findnoise(float x, float y)
 		{
-			int n = x + y * 57;
+			int n = (int)(x + y * 57);
 			n = (n << 13) ^ n;
 			int nn = (n*(n*n * 60493 + 19990303) + 1376312589) & 0x7fffffff;
-			return 1.0 - (nn / 1073741824.0);
+			return 1.0f - (nn / 1073741824.0f);
 		}
 
 		float interpolate(float a, float b, float x)
 		{
-			float ft = x * 3.1415927;
-			float f = (1 - glm::cos(ft)) * 0.5;
+			float ft = x * 3.1415927f;
+			float f = (1 - glm::cos(ft)) * 0.5f;
 			return a * (1 - f) + (b*f);
 		}
 

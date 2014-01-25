@@ -107,21 +107,21 @@ namespace octet
 
 			float hotbar_width = 60 * 8 + 10;
 			current_block_position = (windowWidth*0.5f) - (hotbar_width*0.5f) + 5;
-			ui[ui_hotbar_background].init((windowWidth*0.5f) - (hotbar_width*0.5f), windowHeight - 80, hotbar_width, 70, windowWidth, windowHeight);
-			ui[current_block_background].init(current_block_position, windowHeight - 75, 60, 60, windowWidth, windowHeight);
+			ui[ui_hotbar_background].init(((float)windowWidth*0.5f) - (hotbar_width*0.5f), (float)windowHeight - 80.0f, hotbar_width, 70.0f, (float)windowWidth, (float)windowHeight);
+			ui[current_block_background].init(current_block_position, (float)windowHeight - 75.0f, 60.0f, 60.0f, (float)windowWidth, (float)windowHeight);
 
 			//Create the UI elements
 			float inventoryX = ((windowWidth*0.5f) - (hotbar_width*0.5f)) + 10;
 			for (int i = ui_grass_block; i <= ui_brick_block; i++)
 			{
-				ui[i].init(inventoryX, windowHeight - 70, 50, 50, windowWidth, windowHeight);
+				ui[i].init(inventoryX, (float)windowHeight - 70.0f, 50.0f, 50.0f, (float)windowWidth, (float)windowHeight);
 				inventoryX += 60;
 			}
 
-			ui[crosshair_left].init((windowWidth*0.5f) - 6, (windowHeight*0.5f) - 2, 5, 4, windowWidth, windowHeight);
-			ui[crosshair_right].init((windowWidth*0.5f) + 1, (windowHeight*0.5f) - 2, 5, 4, windowWidth, windowHeight);
-			ui[crosshair_top].init((windowWidth*0.5f) - 2, (windowHeight*0.5f) - 6, 4, 5, windowWidth, windowHeight);
-			ui[crosshair_bottom].init((windowWidth*0.5f) - 2, (windowHeight*0.5f) + 1, 4, 5, windowWidth, windowHeight);
+			ui[crosshair_left].init(((float)windowWidth*0.5f) - 6.0f, ((float)windowHeight*0.5f) - 2.0f, 5.0f, 4.0f, (float)windowWidth, (float)windowHeight);
+			ui[crosshair_right].init(((float)windowWidth*0.5f) + 1.0f, ((float)windowHeight*0.5f) - 2.0f, 5.0f, 4.0f, (float)windowWidth, (float)windowHeight);
+			ui[crosshair_top].init(((float)windowWidth*0.5f) - 2.0f, ((float)windowHeight*0.5f) - 6.0f, 4.0f, 5.0f, (float)windowWidth, (float)windowHeight);
+			ui[crosshair_bottom].init(((float)windowWidth*0.5f) - 2.0f, ((float)windowHeight*0.5f) + 1.0f, 4.0f, 5.0f, (float)windowWidth, (float)windowHeight);
 
 			//Number of Lights
 			numOfLights = 2;
@@ -172,7 +172,7 @@ namespace octet
 						total += terrainNoise.getNoise(x * frequency / zoom, z / zoom * frequency) * amplitude;
 					}
 
-					int y = (total*64.0) + 64.0; //Creates a height between 0-128
+					int y = (int)(total*64) + 64; //Creates a height between 0-128
 
 					for (int i = 0; i <= y; i++)
 					{
@@ -186,7 +186,7 @@ namespace octet
 							c->set(x, i, z, stone);
 					}
 
-					int r = rand() % 500;
+					int r = rand() % 250;
 
 					if (r == 1 && y <= 100)
 					{
@@ -254,7 +254,7 @@ namespace octet
 
 				GLfloat depth;
 
-				glReadPixels(width * 0.5, height * 0.5, 1, 1, GL_DEPTH_COMPONENT, GL_FLOAT, &depth);
+				glReadPixels((int)(width * 0.5f), (int)(height * 0.5f), 1, 1, GL_DEPTH_COMPONENT, GL_FLOAT, &depth);
 				glm::vec4 viewport = glm::vec4(0, 0, width, height);
 				glm::vec3 wincoord = glm::vec3(width * 0.5, height * 0.5, depth);
 				glm::vec3 objcoord = glm::unProject(wincoord, view, projection, viewport);
@@ -311,15 +311,15 @@ namespace octet
 					}
 				}
 
-				int x = glm::floor(nx);
-				int y = glm::floor(ny);
-				int z = glm::floor(nz);
+				int x = (int)glm::floor(nx);
+				int y = (int)glm::floor(ny);
+				int z = (int)glm::floor(nz);
 
 				glm::vec3 end = glm::vec3(x, y, z);
 
-				if (c->get(end.x, end.y, end.z) != 0)
+				if (c->get((int)end.x, (int)end.y, (int)end.z) != 0)
 				{
-					c->set(end.x, end.y, end.z, 0);
+					c->set((int)end.x, (int)end.y, (int)end.z, 0);
 				}
 			}
 
@@ -329,7 +329,7 @@ namespace octet
 
 				GLfloat depth;
 
-				glReadPixels(width * 0.5, height * 0.5, 1, 1, GL_DEPTH_COMPONENT, GL_FLOAT, &depth);
+				glReadPixels((int)(width * 0.5f), (int)(height * 0.5f), 1, 1, GL_DEPTH_COMPONENT, GL_FLOAT, &depth);
 				glm::vec4 viewport = glm::vec4(0, 0, width, height);
 				glm::vec3 wincoord = glm::vec3(width * 0.5, height * 0.5, depth);
 				glm::vec3 objcoord = glm::unProject(wincoord, view, projection, viewport);
@@ -386,15 +386,15 @@ namespace octet
 					}
 				}
 
-				int x = glm::floor(nx);
-				int y = glm::floor(ny);
-				int z = glm::floor(nz);
+				int x = (int)glm::floor(nx);
+				int y = (int)glm::floor(ny);
+				int z = (int)glm::floor(nz);
 
 				glm::vec3 end = glm::vec3(x, y, z);
 
-				if (x > -1 && x < CX * SCX && y > -1 && y < CY * SCY && z > -1 && z < CZ * SCZ && c->get(end.x, end.y, end.z) == 0)
+				if (x > -1 && x < CX * SCX && y > -1 && y < CY * SCY && z > -1 && z < CZ * SCZ && c->get((int)end.x, (int)end.y, (int)end.z) == 0)
 				{
-					c->set(end.x, end.y, end.z, selectedBlock);
+					c->set((int)end.x, (int)end.y, (int)end.z, selectedBlock);
 				}
 			}
 		}
@@ -437,49 +437,49 @@ namespace octet
 			if (is_key_down('1')) // grass
 			{
 				set_key('1', false);
-				ui[current_block_background].setPos(current_block_position + ((grass - 1) * 60), windowHeight - 75);
+				ui[current_block_background].setPos(current_block_position + ((grass - 1) * 60.0f), (float)windowHeight - 75.0f);
 				selectedBlock = grass;
 			}
 			if (is_key_down('2')) // dirt
 			{
 				set_key('2', false);
-				ui[current_block_background].setPos(current_block_position + ((dirt - 1) * 60), windowHeight - 75);
+				ui[current_block_background].setPos(current_block_position + ((dirt - 1) * 60.0f), (float)windowHeight - 75.0f);
 				selectedBlock = dirt;
 			}
 			if (is_key_down('3')) // stone
 			{
 				set_key('3', false);
-				ui[current_block_background].setPos(current_block_position + ((stone - 1) * 60), windowHeight - 75);
+				ui[current_block_background].setPos(current_block_position + ((stone - 1) * 60.0f), (float)windowHeight - 75.0f);
 				selectedBlock = stone;
 			}
 			if (is_key_down('4')) // wood
 			{
 				set_key('4', false);
-				ui[current_block_background].setPos(current_block_position + ((wood - 1) * 60), windowHeight - 75);
+				ui[current_block_background].setPos(current_block_position + ((wood - 1) * 60.0f), (float)windowHeight - 75.0f);
 				selectedBlock = wood;
 			}
 			if (is_key_down('5')) // leaves
 			{
 				set_key('5', false);
-				ui[current_block_background].setPos(current_block_position + ((leaves - 1) * 60), windowHeight - 75);
+				ui[current_block_background].setPos(current_block_position + ((leaves - 1) * 60.0f), (float)windowHeight - 75.0f);
 				selectedBlock = leaves;
 			}
 			if (is_key_down('6')) // snow
 			{
 				set_key('6', false);
-				ui[current_block_background].setPos(current_block_position + ((snow - 1) * 60), windowHeight - 75);
+				ui[current_block_background].setPos(current_block_position + ((snow - 1) * 60.0f), (float)windowHeight - 75.0f);
 				selectedBlock = snow;
 			}
 			if (is_key_down('7')) // sand
 			{
 				set_key('7', false);
-				ui[current_block_background].setPos(current_block_position + ((sand - 1) * 60), windowHeight - 75);
+				ui[current_block_background].setPos(current_block_position + ((sand - 1) * 60.0f), (float)windowHeight - 75.0f);
 				selectedBlock = sand;
 			}
 			if (is_key_down('8')) // brick
 			{
 				set_key('8', false);
-				ui[current_block_background].setPos(current_block_position + ((brick - 1) * 60), windowHeight - 75);
+				ui[current_block_background].setPos(current_block_position + ((brick - 1) * 60.0f), (float)windowHeight - 75.0f);
 				selectedBlock = brick;
 			}
 			if (is_key_down(key_backspace)){

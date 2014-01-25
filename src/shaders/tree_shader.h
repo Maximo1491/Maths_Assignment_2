@@ -65,44 +65,44 @@ namespace octet {
 			
 			void main()
 			{
-				if (texType == 0.0)
+				if (texType < 0.5)
 					gl_FragColor = texture2D(bark, f_texCoord) * f_color;
-				else if (texType == 1.0)
+				else if (texType < 1.5)
 				{
 					if (texture2D(leaf0, f_texCoord).a > 0.5)
 						gl_FragColor = texture2D(leaf0, f_texCoord) * f_color;
 					else
 						discard;
 				}
-				else if (texType == 2.0)
+				else if (texType < 2.5)
 				{
 					if (texture2D(leaf1, f_texCoord).a > 0.5)
 						gl_FragColor = texture2D(leaf1, f_texCoord) * f_color;
 					else
 						discard;
 				}
-				else if (texType == 3.0)
+				else if (texType < 3.5)
 				{
 					if (texture2D(leaf2, f_texCoord).a > 0.5)
 						gl_FragColor = texture2D(leaf2, f_texCoord) * f_color;
 					else
 						discard;
 				}
-				else if (texType == 4.0)
+				else if (texType < 4.5)
 				{
 					if (texture2D(leaf3, f_texCoord).a > 0.5)
 						gl_FragColor = texture2D(leaf3, f_texCoord) * f_color;
 					else
 						discard;
 				}
-				else if (texType == 5.0)
+				else if (texType < 5.5)
 				{
 					if (texture2D(leaf4, f_texCoord).a > 0.5)
 						gl_FragColor = texture2D(leaf4, f_texCoord) * f_color;
 					else
 						discard;
 				}
-				else if (texType == 6.0)
+				else if (texType < 6.5)
 				{
 					if (texture2D(leaf5, f_texCoord).a > 0.5)
 						gl_FragColor = texture2D(leaf5, f_texCoord) * f_color;

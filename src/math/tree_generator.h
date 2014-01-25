@@ -27,8 +27,8 @@ namespace octet
 
 		dynarray<std::string> rules;
 		dynarray<TreeBox*> formedTree;
-		dynarray<GLfloat> vertices, normals;
-		dynarray<GLfloat> texCoords, colors;
+		dynarray<GLfloat> vertices, normals, colors;
+		dynarray<GLushort> texCoords;
 		std::vector<char> formula, newFormula;
 		GLfloat* sphere;
 		GLushort* sphereTex;
@@ -994,7 +994,7 @@ namespace octet
 			float radiusOffset = 360.0f / (numberOfLeafQuads * 2);
 			float highestBranch = 0.0f;
 
-			for (int i = 0; i < leafHeight.size(); i++)
+			for (unsigned int i = 0; i < leafHeight.size(); i++)
 			{
 				if (leafHeight[i] > highestBranch) highestBranch = leafHeight[i];
 
@@ -1178,16 +1178,16 @@ namespace octet
 			GLushort* ts = new GLushort[texCoords.size()];
 			GLfloat* cs = new GLfloat[colors.size()];
 
-			for (int i = 0; i < vertices.size(); i++)
+			for (unsigned int i = 0; i < vertices.size(); i++)
 				vs[i] = vertices[i];
 
-			for (int i = 0; i < texCoords.size(); i++)
+			for (unsigned int i = 0; i < texCoords.size(); i++)
 				ts[i] = texCoords[i];
 
-			for (int i = 0; i < normals.size(); i++)
+			for (unsigned int i = 0; i < normals.size(); i++)
 				ns[i] = normals[i];
 
-			for (int i = 0; i < colors.size(); i++)
+			for (unsigned int i = 0; i < colors.size(); i++)
 				cs[i] = colors[i];
 
 			glBindBuffer(GL_ARRAY_BUFFER, vbo);
@@ -1219,7 +1219,7 @@ namespace octet
 		//the formula variable.
 		void LoadOriginalAxiom()
 		{
-			for (unsigned int i = 0; i < originalAxiom.size(); i++)
+			for (int i = 0; i < originalAxiom.size(); i++)
 				formula.push_back(originalAxiom[i]);
 		}
 
