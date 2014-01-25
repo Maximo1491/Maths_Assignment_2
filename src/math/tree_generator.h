@@ -793,10 +793,10 @@ namespace octet
 			scaleMat[1][1] = scale;
 			scaleMat[2][2] = scale;
 
-			leafColor = vec4(1.0f, 1.0f, 1.0f, 1.0f);
-
 			if (treeType > dead)
 			{
+				leafColor = vec4(1.0f, 1.0f, 1.0f, 1.0f);
+
 				if (treeType == dying)
 				{
 					barkColor = vec4(0.75f, 0.75f, 0.75f, 1.0f);
@@ -982,7 +982,7 @@ namespace octet
 				}
 			}
 			
-			MakeLeaves(leafHeight, leafMatrices, modelToWorld, scaleMat, 4, leafColor);
+			MakeLeaves(leafHeight, leafMatrices, modelToWorld, scaleMat, 6, leafColor);
 
 			ClearTreeForm(formedTree);
 			ClearFormula();
@@ -998,9 +998,9 @@ namespace octet
 			{
 				if (leafHeight[i] > highestBranch) highestBranch = leafHeight[i];
 
-				float leafRadius = leafHeight[i] * 0.85;
+				float leafRadius = 20 / leafHeight[i];
 
-				if (leafRadius > 6.0f) leafRadius = 6.0f;
+				if (leafRadius < 10.0f) leafRadius = 10.0f;
 
 				if (leafRadius > 0.2f && leafHeight[i] > 1.0f)
 				{
@@ -1009,7 +1009,7 @@ namespace octet
 					branchPos = leafMat[i];
 					branchPos + scaleMat;
 
-					if (branchPos.row(3).y() > highestBranch * 0.5)
+					if (branchPos.row(3).y() > highestBranch * 1.25)
 
 					{
 						for (int j = 0; j < numberOfLeafQuads; j++)
