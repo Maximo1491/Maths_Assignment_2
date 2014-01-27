@@ -47,6 +47,7 @@ namespace octet
 			alive,
 		};
 		
+		//Constructor
 		tree_generator() 
 		{
 			srand((unsigned) time(0));
@@ -70,10 +71,12 @@ namespace octet
 			glGenBuffers(1, &cbo);
 
 			GLuint textures[7];
-			//yoloswaggins
-			//Generate a buffer for the bark texture
+
+			//Generate buffers for all textures.
 			glGenTextures(7, textures);
 			glEnable(GL_TEXTURE_2D);
+
+			//Cycle through each texture, read the file, and load the data into each texture buffer.
 			glActiveTexture(GL_TEXTURE0);
 			glBindTexture(GL_TEXTURE_2D, textures[0]);
 
@@ -175,6 +178,7 @@ namespace octet
 			ReadFile("../../assets/thronecraft/Stochastic_Sample.txt");
 		}
 
+		//Deconstructor
 		~tree_generator()
 		{
 			glDeleteBuffers(1, &vbo);
@@ -183,13 +187,12 @@ namespace octet
 			glDeleteBuffers(1, &cbo);
 		}
 
+		//When called, this function will render the trees onto the screen.
 		void render(glm::mat4 projection, tree_shader &tree_shader_, int numOfLights, const glm::vec4 *light_information, glm::vec4 ambient, glm::vec4 *diffuse)
 		{
 			tree_shader_.render(projection, numOfLights, light_information, ambient, diffuse);
 
 			glDisable(GL_CULL_FACE);
-			//glEnable(GL_BLEND);
-			//glBlendFunc (GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
 
 			glEnableVertexAttribArray(attribute_pos);
 			glEnableVertexAttribArray(attribute_uv);
@@ -573,7 +576,7 @@ namespace octet
 			MakeTree(treeType, origin);
 		}
 
-		//This funnction will compute the vertices and indices of the tree for drawing.
+		//This function will compute the vertices and indices of the tree for drawing.
 		void MakeTree(int treeType, glm::mat4 origin)
 		{
 			TreeBox* treeBox;
@@ -818,38 +821,59 @@ namespace octet
 			}
 
 			//Cycle through all the branches in the formedTree stack.
+			//We will determine the radius of each branch section, find the vertices for all
+			//the quads needed to make that section, and move the the next height section.
 			for (dynarray<TreeBox*>::iterator iter = formedTree.begin(); iter != formedTree.end(); iter++)
 			{
 				float radiusOffset;
 				float currentRadius;
 				float nextRadius;
 
+				//Determine the initial radius of this branch using the branch height.
 				currentRadius = branchRadius * (*iter)->branchHeight;
 				
+				//Check to see if the radius of this branch is larger than the parent branch
+				//radius where the current branch begins.  If it is larger, we set the radius
+				//to the radius of the parent branch at that location and subtract the
+				//radius offset to make it a bit smaller.
 				if ((*iter)->parentBranchIndex > -1 && currentRadius > formedTree[(*iter)->parentBranchIndex]->radiusOffset * formedTree[(*iter)->parentBranchIndex]->branchHeight - (formedTree[(*iter)->parentBranchIndex]->radiusOffset * (*iter)->parentHeightAtBase))
 					currentRadius = formedTree[(*iter)->parentBranchIndex]->radiusOffset * formedTree[(*iter)->parentBranchIndex]->branchHeight - (formedTree[(*iter)->parentBranchIndex]->radiusOffset * ((*iter)->parentHeightAtBase + 1));
 
+				//Determine the radius offset of the branch.  Save that offset if any calculations
+				//need to be made when rendering its children branches.
 				radiusOffset = currentRadius / (*iter)->branchHeight;
 				(*iter)->radiusOffset = radiusOffset;
 
 				currentRadius += radiusOffset;
 				nextRadius = currentRadius;
 
+				//Determine if the tree is dying or alive.  If so save the branch
+				//matrix and the height for rendering the leaves later.
 				if (treeType > 0)
 				{
 					leafHeight.push_back((*iter)->branchHeight);
 					leafMatrices.push_back((*iter)->modelToWorld);
 				}
 
+				//Cycle through all the height sections of the branch.
 				for (int i = 0; i < (*iter)->branchHeight; i++)
 				{
+					//Set the current angle to draw the branch section to 0.
+					//Determine the current section's radius by subtracting the radius offset.
 					float currentAngle = 0.0f;
 					currentRadius -= radiusOffset;
 					nextRadius = currentRadius - radiusOffset;
 
+					//If this is the base of the trunk of the tree increase the radius to make it
+					//look like there are roots at the base.
 					if ((*iter)->parentBranchIndex < 0 && i <= 0)
 						currentRadius = currentRadius + (radiusOffset * 10);
 
+					//Cycle through the subsections of each height section and determine the quad vertex locations,
+					//the normals, the colors, and the texture coordinates.
+					//We get the normals of the quads first before as we don't want the scale matrix and terrain location
+					//matrix affecting the normals.
+					//The vertices will have the scale matrix and terrain position location applied to the vertices.
 					for (int j = 0; j < branchSubSections; j++)
 					{	
 						vec4 vert1 = vec4(currentRadius * cos(currentAngle * 0.0174532925f), ((float)i * (height * 2.0f) + 1.0f) - (*iter)->branchHeight, currentRadius * sin(currentAngle * 0.0174532925f), 1.0f) * (*iter)->modelToWorld;
@@ -974,52 +998,68 @@ namespace octet
 						colors.push_back(barkColor.z());
 						colors.push_back(barkColor.w());
 
+						//After determining the sections vertices, colors, tecture coordinates, and
+						//normals we go to the next quad subsection.
 						currentAngle += angleOffset;
 					}
 
+					//If this was the base height section of the trunk we need to adjust the radius
+					//of the base back to the original radius before moving on.
 					if ((*iter)->parentBranchIndex < 0 && i <= 0)
 						currentRadius = currentRadius - (radiusOffset * 10);
 				}
 			}
 			
+			//Call the MakeLeaves function to draw the leaf bunches for the leaves.
 			MakeLeaves(leafHeight, leafMatrices, modelToWorld, scaleMat, 6, leafColor);
 
+			//Clear the formula and formed tree then load the original axiom to prepare for the next tree.
 			ClearTreeForm(formedTree);
 			ClearFormula();
 			LoadOriginalAxiom();
 		}
 
+		//A function to make the leaves for a tree.  The height and start points are passed
+		//to this function to determine where the leaf bunch will be rendered.
 		void MakeLeaves(std::vector<float> &leafHeight, std::vector<mat4t> leafMat, mat4t &origin, mat4t &scaleMat, int numberOfLeafQuads, vec4 &leafColor)
 		{
+			//Determine the number of quads that are needed and calculate the radius offset.
+			//Keep track of the highest branch in the tree.
 			float radiusOffset = 360.0f / (numberOfLeafQuads * 2);
 			float highestBranch = 0.0f;
 
+			//Loop through all the branches in the tree.
 			for (unsigned int i = 0; i < leafHeight.size(); i++)
 			{
+				//Determine if this branch is the highest branch in the tee thus far.
 				if (leafHeight[i] > highestBranch) highestBranch = leafHeight[i];
-
+				
+				//Determine the leaf radius in relation to the branch height.
 				float leafRadius = 20 / leafHeight[i];
 
+				//We don't want leaf bunches that are extremely small.  If the leaf radius
+				//is less than 10 make it equal to 10.
 				if (leafRadius < 10.0f) leafRadius = 10.0f;
 
-				if (leafRadius > 0.2f && leafHeight[i] > 1.0f)
+				//Check if the branch height is greater than 1.  If it is draw leaves.
+				if (leafHeight[i] > 1.0f)
 				{
+					//Move the branch starting position to the end of the branch.
 					leafMat[i].translate(0.0f, leafHeight[i], 0.0f);
 					mat4t branchPos;
 					branchPos = leafMat[i];
-					branchPos + scaleMat;
 
+					//Check to see if the branch height is greater than 125% of the highest branch.
 					if (branchPos.row(3).y() > highestBranch * 1.25)
-
 					{
+						//Cycle through the number of leaf quads we want to generate and make
+						//the leaf bunch.
+						//The matrix will be moved to each location that each quad will be rendered.
+						//The vertices, colors, texture coordinates, and normals will be saved in
+						//the dynamic arrays.
 						for (int j = 0; j < numberOfLeafQuads; j++)
-							//for (int j = 0; j < numberOfLeafQuads * 2; j++)
 						{
-							//if (j < numberOfLeafQuads)
 							leafMat[i].rotateY(radiusOffset);
-							//else
-							//leafMat[i].rotateX(radiusOffset);
-
 							leafMat[i].translate(-leafRadius, leafRadius, 0.0f);
 
 							vec4 leafVert = vec4(leafMat[i].row(3).x(), leafMat[i].row(3).y(), leafMat[i].row(3).z(), 1.0f) * scaleMat;
@@ -1171,13 +1211,19 @@ namespace octet
 			}
 		}
 
+		//A function to prepare the trees graphical buffers for rendering.
+		//This function is called when the scene is ready to be rendered and no
+		//more trees are to be generated.
 		void PrepareTrees()
 		{
+			//Prepare arrays to hold the vertices, normals, colors, and texture
+			//coordinates to pass to the graphic buffers.
 			GLfloat* vs = new GLfloat[vertices.size()];
 			GLfloat* ns = new GLfloat[normals.size()];
 			GLushort* ts = new GLushort[texCoords.size()];
 			GLfloat* cs = new GLfloat[colors.size()];
 
+			//Fill the arrays with the contents of each of the dynamic arrays.
 			for (unsigned int i = 0; i < vertices.size(); i++)
 				vs[i] = vertices[i];
 
@@ -1190,6 +1236,7 @@ namespace octet
 			for (unsigned int i = 0; i < colors.size(); i++)
 				cs[i] = colors[i];
 
+			//Bind the array data to each of the buffers for the shaders to render.
 			glBindBuffer(GL_ARRAY_BUFFER, vbo);
 			glBufferData(GL_ARRAY_BUFFER, vertices.size() * sizeof(GLfloat), vs, GL_STATIC_DRAW);
 
@@ -1202,6 +1249,7 @@ namespace octet
 			glBindBuffer(GL_ARRAY_BUFFER, cbo);
 			glBufferData(GL_ARRAY_BUFFER, colors.size() * sizeof(GLfloat), cs, GL_STATIC_DRAW);
 
+			//Delete the arrays after we have bound the array data to the buffers.
 			delete[] vs;
 			delete[] ts;
 			delete[] ns;
