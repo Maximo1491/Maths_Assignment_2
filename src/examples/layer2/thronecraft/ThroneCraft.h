@@ -146,7 +146,8 @@ namespace octet
 
 			c = new superChunk();
 
-			generateTerrain(0, 0, 256, 256, 90, 0.25);
+			//terrainNoise.setRandomSeed();
+			generateTerrain(0, 0, 256, 256, 100, 0.25);
 
 			//Start by selecting a grass block
 			selectedBlock = grass;
@@ -156,7 +157,7 @@ namespace octet
 
 		void generateTerrain(int xPos, int zPos, int width, int depth, float zoom, float persistance)
 		{
-			int octaves = 2;
+			int octaves = 1;
 
 			for (int z = zPos; z < zPos + depth; z++)
 			{
@@ -164,12 +165,12 @@ namespace octet
 				{
 					float total = 0;
 
-					for (float a = 0; a < octaves - 1; a++)
+					for (float a = 0; a < octaves; a++)
 					{
 						float frequency = glm::pow(2.0f, a);
 						float amplitude = glm::pow(persistance, a);
 
-						total += terrainNoise.getNoise(x * frequency / zoom, z / zoom * frequency) * amplitude;
+						total += terrainNoise.getNoise((x + terrainNoise.getSeed()) * frequency / zoom, (z + terrainNoise.getSeed()) / zoom * frequency) * amplitude;
 					}
 
 					int y = (int)(total*64) + 64; //Creates a height between 0-128

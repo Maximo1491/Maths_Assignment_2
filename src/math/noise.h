@@ -1,8 +1,11 @@
 namespace octet {
 	class noise{
+
+		float seed;
 	public:
 		noise()
 		{
+			seed = 0;
 		}
 
 		float findnoise(float x, float y)
@@ -36,6 +39,20 @@ namespace octet {
 			float int2 = interpolate(u, v, x - floorx);
 
 			return interpolate(int1, int2, y - floory);
+		}
+
+		float getSeed() { return seed; }
+
+		void setSeed(float s)
+		{
+			seed = s;
+		}
+
+		void setRandomSeed()
+		{
+			srand(time(NULL));
+
+			seed = rand() % rand();
 		}
 	};
 }
