@@ -12,7 +12,7 @@ namespace octet
 		{
 			glGenBuffers(1, &vbo);
 
-			float radius = 200.0f;
+			float radius = 250.0f;
 			int subdivisions = 5;
 
 			GLfloat* vert_swap = new GLfloat[24 * 3 * (int)pow(4.0f, subdivisions)];

@@ -1,58 +1,89 @@
 namespace octet {
-	class noise{
+  class noise{
 
-		float seed;
-	public:
-		noise()
-		{
-			seed = 0;
-		}
+    float seed;
+    float smoothness;
+  public:
+    noise()
+    {
+      seed = 0;
+      smoothness = 25.0f;
+    }
 
-		float findnoise(float x, float y)
-		{
-			int n = (int)(x + y * 57);
-			n = (n << 13) ^ n;
-			int nn = (n*(n*n * 60493 + 19990303) + 1376312589) & 0x7fffffff;
-			return 1.0f - (nn / 1073741824.0f);
-		}
+    float findnoise(float x, float y)
+    {
+      int n = (int)(x + y * 57);
+      n = (n << 13) ^ n;
+      return ( 1.0 - ( (n * (n * n * 15731 + 789221) + 1376312589) & 0x7fffffff) / 1073741824.0);
+    }
 
-		float interpolate(float a, float b, float x)
-		{
-			float ft = x * 3.1415927f;
-			float f = (1 - glm::cos(ft)) * 0.5f;
-			return a * (1 - f) + (b*f);
-		}
+    float interpolate(float a, float b, float x)
+    {
+      float ft = x * 3.1415927f;
+      float f = (1 - glm::cos(ft)) * 0.5f;
+      return a * (1 - f) + (b*f);
+    }
 
-		float getNoise(float x, float y)
-		{
-			float floorx = glm::floor(x);
-			float floory = glm::floor(y);
+    float smoothNoise( float x, float y)
+    {
+      float corners = (findnoise(x-1, y-1) + findnoise(x+1, y-1) + findnoise(x-1, y+1) + findnoise(x+1, y+1))/16;
+      float sides = (findnoise(x-1, y) + findnoise(x+1, y) + findnoise(x, y-1) + findnoise(x, y+1))/8;
+      float center = findnoise(x, y)/4;
+      return corners + sides + center;
+    }
 
-			float s, t, u, v;
+    float getNoise(float x, float y)
+    {
+      int intX = int(x);
+      int intY = int(y);
+      float fracX = x - intX;
+      float fracY = y - intY;
 
-			s = findnoise(floorx, floory);
-			t = findnoise(floorx + 1, floory);
-			u = findnoise(floorx, floory + 1);
-			v = findnoise(floorx + 1, floory + 1);
+      float v1 = smoothNoise(intX, intY);
+      float v2 = smoothNoise(intX + 1, intY);
+      float v3 = smoothNoise(intX, intY + 1);
+      float v4 = smoothNoise(intX + 1, intY + 1);
 
-			float int1 = interpolate(s, t, x - floorx);
-			float int2 = interpolate(u, v, x - floorx);
+      float i1 = interpolate(v1, v2, fracX);
+      float i2 = interpolate(v3, v4, fracX);
 
-			return interpolate(int1, int2, y - floory);
-		}
+      return interpolate(i1, i2, fracY);
+    }
 
-		float getSeed() { return seed; }
+    float perlinNoise( float x, float y )
+    {
+      float total = 0;
+      float persistance = 0.5f;
+      float octaves = 2;
 
-		void setSeed(float s)
-		{
-			seed = s;
-		}
+      for (float i = 0; i < octaves - 1; i++)
+      {
+        float frequency = glm::pow(2.0f, i);
+        float amplitude = glm::pow(persistance, i);
 
-		void setRandomSeed()
-		{
-			srand(time(NULL));
+        total += getNoise((x + seed) * frequency/smoothness, (y + seed) *  frequency /smoothness) * amplitude;
+      }
 
-			seed = rand() % rand();
-		}
-	};
+      return total;
+    }
+
+    float getSeed() { return seed; }
+
+    void setSeed(float s)
+    {
+      seed = s;
+    }
+
+    void setSmoothness( float s )
+    {
+      smoothness = s;
+    }
+
+    void setRandomSeed()
+    {
+      srand(time(NULL));
+
+      seed = rand() % rand();
+    }
+  };
 }
