@@ -124,21 +124,22 @@ namespace octet
 			ui[crosshair_bottom].init(((float)windowWidth*0.5f) - 2.0f, ((float)windowHeight*0.5f) + 1.0f, 4.0f, 5.0f, (float)windowWidth, (float)windowHeight);
 
 			//Number of Lights
-			numOfLights = 2;
+			numOfLights = 3;
 
 			//Ambient Light
 			light_ambient = glm::vec4(0.2f, 0.2f, 0.2f, 1.0f);
 
-			//Diffuse Light
-			//light_diffuse = glm::vec4( 1.0f, 1.0f, 1.0f, 1.0f );
-
 			//Light 1
-			light_information[0] = glm::vec4(1.0f, 2.0f, 3.0f, 0.0f);
-			light_diffuse[0] = glm::vec4(1.0f, 1.0f, 1.0f, 1.0f);
+			light_information[0] = glm::vec4(0.0f, 0.0f, 0.0f, 0.0f);
+			light_diffuse[0] = glm::vec4(0.5f, 0.5f, 0.5f, 1.0f);
 
 			//Light 2
 			light_information[1] = glm::vec4(-1.0f, 2.0f, -3.0f, 0.0f);
-			light_diffuse[1] = glm::vec4(0.75f, 0.75f, 0.75f, 1.0f);
+			light_diffuse[1] = glm::vec4(0.35f, 0.35f, 0.35f, 1.0f);
+
+			//Light 3
+			light_information[2] = glm::vec4(1.0f, 2.0f, 3.0f, 0.0f);
+			light_diffuse[2] = glm::vec4(0.4f, 0.4f, 0.4f, 1.0f);
 
 			light_angle = 0.0f;
 
