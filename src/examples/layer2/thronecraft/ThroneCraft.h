@@ -147,7 +147,7 @@ namespace octet
 
 			c = new superChunk();
 
-			terrainNoise.setRandomSeed();
+			//terrainNoise.setRandomSeed();
 			generateTerrain(0, 0, 256, 256);
 
 			//Start by selecting a grass block
